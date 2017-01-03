@@ -34,7 +34,10 @@ class clusterClassification(object):
         """ Gets the photometry of the stars of interest """
         hS = hm.clusterSpec()
         pS = ps.clusterPhot()
-        lookRows = self.classData['SpType'] == sType
+        if sType == None:
+            lookRows = np.ones(len(self.classData),dtype=bool)
+        else:
+            lookRows = self.classData['SpType'] == sType
         t = Table()
         names, colors, spTypeList = [], [], []
         for oneRow in self.classData[lookRows]:
@@ -51,3 +54,4 @@ class clusterClassification(object):
         t['Color (g-r)'] = colors
         t['SpType'] = spTypeList
         print t
+    
