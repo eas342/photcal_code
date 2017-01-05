@@ -16,5 +16,5 @@ def do_cm():
     mkObj = mk.clusterClassification()
     mkObj.get_phot()
     psObj.ax.plot(mkObj.photdat['Color (g-r)'],mkObj.photdat['g'],'o',color='red')
-    psObj.fig.savefig('colormag.pdf')
+    psObj.fig.savefig('plots/colormag.pdf')
     #psObj.fig.show()
