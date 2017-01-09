@@ -10,6 +10,7 @@ class clusterPhot(object):
     def __init__(self,photFile='../pan_starrs/NGC2420.txt'):
         self.photFile = photFile
         self.dat = ascii.read(photFile)
+        self.get_cluster_pt()
     
     def lookup_src(self,ra,dec):
         """ Look up a source from the RA and Dec. Expects these to both be in degrees"""
@@ -22,7 +23,22 @@ class clusterPhot(object):
         else:
             return self.dat[rowIndex]
     
-    def plot_cm(self,color1='g',color2='r',mag='g',ra='ra',dec='dec',racen=114.5958,deccen=21.573):
+    def get_cluster_pt(self,dist=5,ra='ra',dec='dec',racen=114.5958,deccen=21.573):
+        """ 
+        Gets the cluster points from the distance to center
+        
+        Parameters
+        --------------
+        dist: float
+            Distance in arc-minutes
+        """
+        deltaRA = racen - self.dat[ra]
+        deltaDEC = deccen - self.dat[dec]
+        deltaDistApprox = np.sqrt(deltaRA**2 / np.sin(self.dat[dec])**2 + deltaDEC**2)
+        self.cpoints = deltaDistApprox < dist/60.
+        
+    
+    def plot_cm(self,color1='g',color2='r',mag='g',):
         """ 
         Plots a color-magnitude diagram from the photometry 
         
@@ -36,12 +52,7 @@ class clusterPhot(object):
             Magnitude photometric band
         """
         fig, ax = plt.subplots()
-        
-        deltaRA = racen - self.dat['ra']
-        deltaDEC = deccen - self.dat['dec']
-        deltaDistApprox = np.sqrt(deltaRA**2 / np.sin(self.dat['dec'])**2 + deltaDEC**2)
-        cpoints = deltaDistApprox < 5./60.
-        cdat = self.dat[cpoints]
+        cdat = self.dat[self.cpoints]
         
         ax.plot(cdat[color1] - cdat[color2],cdat[mag],'.',rasterized=True)
         ax.set_xlabel(color1+' - '+color2)
