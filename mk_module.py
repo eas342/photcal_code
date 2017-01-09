@@ -40,20 +40,26 @@ class clusterClassification(object):
             lookRows = self.classData['SpType'] == sType
         t = Table()
         names, colors, mags, spTypeList = [], [], [], []
+        posRA, posDec = [], []
         for oneRow in self.classData[lookRows]:
             baseName = os.path.basename(oneRow['SpFile'])
             namePrefix = os.path.splitext(baseName)[0]
             fibinfo = hS.getbyObjName(namePrefix)
             ra = fibinfo['RA']
             dec = fibinfo['DEC']
+            posRA.append(ra)
+            posDec.append(dec)
             phot = pS.lookup_src(ra,dec)
             names.append(fibinfo['OBJTYPE'])
             colors.append(phot['g'] - phot['r'])
             mags.append(phot['g'])
             spTypeList.append(oneRow['SpType'])
+            
         t['Name'] = names
         t['Color (g-r)'] = colors
         t['g'] = mags
         t['SpType'] = spTypeList
+        t['ra'] = posRA
+        t['dec'] = posDec
         self.photdat = t
     
