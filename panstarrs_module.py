@@ -7,9 +7,11 @@ import numpy as np
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry """
     
-    def __init__(self,photFile='../pan_starrs/NGC2420.txt'):
+    def __init__(self,photFile='../pan_starrs/NGC2420.txt',racen=114.5958,deccen=21.573):
         self.photFile = photFile
         self.dat = ascii.read(photFile)
+        self.racen = racen
+        self.deccen = deccen
         self.get_cluster_pt()
     
     def lookup_src(self,ra,dec):
@@ -23,7 +25,7 @@ class clusterPhot(object):
         else:
             return self.dat[rowIndex]
     
-    def get_cluster_pt(self,dist=5,ra='ra',dec='dec',racen=114.5958,deccen=21.573):
+    def get_cluster_pt(self,dist=7.5,ra='ra',dec='dec'):
         """ 
         Gets the cluster points from the distance to center
         
@@ -32,9 +34,9 @@ class clusterPhot(object):
         dist: float
             Distance in arc-minutes
         """
-        deltaRA = racen - self.dat[ra]
-        deltaDEC = deccen - self.dat[dec]
-        deltaDistApprox = np.sqrt(deltaRA**2 / np.sin(self.dat[dec])**2 + deltaDEC**2)
+        deltaRA = self.racen - self.dat[ra]
+        deltaDEC = self.deccen - self.dat[dec]
+        deltaDistApprox = np.sqrt(deltaRA**2 * np.cos(self.dat[dec])**2 + deltaDEC**2)
         self.cpoints = deltaDistApprox < dist/60.
         
     
@@ -54,14 +56,41 @@ class clusterPhot(object):
         fig, ax = plt.subplots()
         cdat = self.dat[self.cpoints]
         
-        ax.plot(cdat[color1] - cdat[color2],cdat[mag],'.',rasterized=True)
+        ax.plot(cdat[color1] - cdat[color2],cdat[mag],'.',rasterized=True,label='')
         ax.set_xlabel(color1+' - '+color2)
         ax.set_ylabel(mag)
         ax.invert_yaxis()
         
         self.ax = ax
         self.fig = fig
-        #fig.show()
+    
+    def plot_fov(self):
+        """
+        Plots the cluster stars in RA and DEC
+        """
+        fig, ax = plt.subplots()
+        cdat = self.dat[self.cpoints]
+        
+        ax.plot(cdat['ra'],cdat['dec'],'.',rasterized=True,label='')
+        ax.set_xlabel('RA (deg)')
+        ax.set_ylabel('Dec (deg)')
+        
+        ### Show the NIRCam FOV
+        NIRCamFOV = 2.16 / 60. ## deg
+        deltaX = NIRCamFOV * 0.5/ np.cos(self.deccen * np.pi/180.) ## Distances in RA/Dec, deg
+        deltaY = NIRCamFOV * 0.5 ## Distances in RA/dec deg
+
+        coordA = self.racen - 0.02, self.deccen + 0.03
+        coordB = coordA[0], coordA[1] - NIRCamFOV - 42/3600.
+        
+        for ncoord, FOVname in zip([coordA,coordB],['A','B']):
+            xpt = ncoord[0] + np.array([-deltaX,deltaX,deltaX,-deltaX,-deltaX])
+            ypt = ncoord[1] + np.array([-deltaY,-deltaY,deltaY,deltaY,-deltaY])
+            ax.plot(xpt,ypt,linewidth=1,label='Module '+FOVname)
+        #ax.legend(frameon=False,loc='best')
+        
+        self.ax = ax
+        self.fig = fig
 
 if __name__ == "__main__":
     cP = clusterPhot()
