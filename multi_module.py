@@ -8,11 +8,17 @@ import mk_module as mk
 import pdb
 import os
 import pandas as pd
+import yaml
 
-def make_cluster_file():
+def make_cluster_csv():
     """ Makes a CSV from the cluster file """
     dat = pd.read_excel('data/cluster_data.xlsx')
     dat.to_csv('data/cluster_data.csv',index=False)
+
+def getRedFile(src,index=0,dataType='hectoData'):
+    """ Finds the reduced file from the name and index """
+    clusterF = yaml.load(open('data/cluster_files.yaml'))
+    return clusterF[src][dataType][index]
 
 def do_cm(fov=False):
     """
