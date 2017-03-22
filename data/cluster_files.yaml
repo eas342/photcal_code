@@ -1,0 +1,8 @@
+NGC 2420:
+   hectoData:
+      - ../hectospec_data/2016.0207/reduction/0102/spHect-ngc2420_cat_1.2468-0102.fits
+      - ../hectospec_data/2016.1009/reduction/0100/spHect-catalog_second_round_NGC2420_1.0447-0100.fits
+      - ../hectospec_data/2016.1125/reduction/0100/spHect-catalog_second_round_NGC2420_1.0767-0100.fits
+NGC 2506:
+   hectoData:
+      - ../hectospec_data/2016.1126/reduction/0100/spHect-catalog_NGC2506_1.0820-0100.fits
