@@ -9,6 +9,10 @@ import multi_module
 import matplotlib.pyplot as plt
 import pdb
 
+## Remove the warnings on the robust polynomial fitting
+import warnings
+warnings.simplefilter('ignore', np.RankWarning)
+
 class clusterSpec(object):
     def __init__(self,kernelWidth=2.5,src='NGC 2420'):
         self.src = src
