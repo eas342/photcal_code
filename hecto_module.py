@@ -51,11 +51,23 @@ class clusterSpec(object):
             cleanNames.append(newString)
         self.fibinfo['cleanName'] = cleanNames
         
-    def prepForMK(self,showFig=False):
+    def prepForMK(self,showFig=False,nset = 3,waveStart=3800,waveEnd=5600):
         """
         Prepares the spectra for MKClass
+        
+        Parameters
+        -----------------
+        showFig: bool
+            Show a figure for the spectra rectification
+        nset: int
+            Number of regions over which to do polynomial fitting
+        
         """
         datkern = Gaussian1DKernel(stddev=self.kernelWidth)
+        
+        ## Wavelength locations for the regions over which to do polynomials
+        waveLocs = np.linspace(waveStart,waveEnd,nset+1)
+        
         for currentFib in self.goodfib:
             #fig, ax = plt.subplots(figsize=(15,4))
             x = self.wave2D[currentFib,:]
@@ -63,24 +75,28 @@ class clusterSpec(object):
             yconv = convolve(y, datkern, boundary='extend')
             
             ## Points with useful features for classification by mkClass
-            keepPts = (x > 3800) & (x < 5600)
+            keepPts = (x > waveStart) & (x < waveEnd)
             outX = x[keepPts]
             trimY = yconv[keepPts]
             
             ## Do a fit in log space so it won't give you zeros
             yLog = np.log10(trimY)
-            roughPoly = es_gen.robust_poly(outX,yLog,8,sigreject=8.)
-            modelF1 = 10**np.polyval(roughPoly,outX)
+            
+            modelF1 = np.zeros_like(outX)
+            for indSet in range(nset):
+                setPts = (outX > waveLocs[indSet]) & (outX <= waveLocs[indSet+1])
+                setPoly = es_gen.robust_poly(outX[setPts],yLog[setPts],8,sigreject=2.)
+                modelF1[setPts] = 10**np.polyval(setPoly,outX[setPts])
             ynorm1 = trimY / modelF1
             
-            roughPoly2 = es_gen.robust_poly(outX,ynorm1,10,sigreject=15.)
+            roughPoly2 = es_gen.robust_poly(outX,ynorm1,10,sigreject=2.)
             modelF2 = np.polyval(roughPoly2,outX)
             ynorm2 = ynorm1 / modelF2
             
             if showFig == True:
                 plt.close('all')
                 fig, (ax1, ax2, ax3) = plt.subplots(3)
-                ax1.plot(outX,trimY)
+                ax1.semilogy(outX,trimY)
                 ax1.plot(outX,modelF1)
                 ax2.plot(outX,ynorm1)
                 ax2.plot(outX,modelF2)
