@@ -83,25 +83,48 @@ class clusterSpec(object):
             yLog = np.log10(trimY)
             
             modelF1 = np.zeros_like(outX)
+            
+            setPtsArr = []
             for indSet in range(nset):
                 setPts = (outX > waveLocs[indSet]) & (outX <= waveLocs[indSet+1])
+                setPtsArr.append(setPts)
                 setPoly = es_gen.robust_poly(outX[setPts],yLog[setPts],8,sigreject=2.)
                 modelF1[setPts] = 10**np.polyval(setPoly,outX[setPts])
+            
             ynorm1 = trimY / modelF1
             
-            roughPoly2 = es_gen.robust_poly(outX,ynorm1,10,sigreject=2.)
-            modelF2 = np.polyval(roughPoly2,outX)
+            ## Choose the points that are above 1.0 for the continuum
+            contPoints = (ynorm1 > 1.0)
+            
+            modelF2 = np.zeros_like(outX)
+            fitPtsArr = []
+            for indSet in range(nset):
+                setPts = (setPtsArr[indSet])
+                fitPts = setPts & contPoints ## continuum and part of the set
+                fitPtsArr.append(fitPts)
+                ## add in the point previous point for continuity
+                if indSet >= 1:
+                    ## Get the maximum index of the previous set of fit points
+                    prevPoint = np.argmax(outX[fitPtsArr[indSet-1]])
+                    
+                setPoly = es_gen.robust_poly(outX[fitPts],ynorm1[fitPts],8,sigreject=3.)
+                modelF2[setPts] = np.polyval(setPoly,outX[setPts])
             ynorm2 = ynorm1 / modelF2
             
             if showFig == True:
                 plt.close('all')
-                fig, (ax1, ax2, ax3) = plt.subplots(3)
+                fig, (ax1, ax2, ax3) = plt.subplots(3,sharex=True)
                 ax1.semilogy(outX,trimY)
                 ax1.plot(outX,modelF1)
+                ax1.set_ylabel('Flux')
                 ax2.plot(outX,ynorm1)
                 ax2.plot(outX,modelF2)
+                ax2.set_ylabel('Norm Flux')
                 ax3.plot(outX,ynorm2)
+                ax3.set_ylabel('Norm Flux')
+                ax3.set_xlabel('Wavelength ($\AA$)')
                 
+                fig.savefig('plots/spec_rect/'+self.fibinfo['cleanName'][currentFib]+'_spec.pdf')
                 fig.show()
             pdb.set_trace()
 
