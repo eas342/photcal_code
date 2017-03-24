@@ -8,15 +8,17 @@ import yaml
 import multi_module
 import matplotlib.pyplot as plt
 import pdb
+import os
 
 ## Remove the warnings on the robust polynomial fitting
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 class clusterSpec(object):
-    def __init__(self,kernelWidth=2.5,src='NGC 2420'):
+    def __init__(self,kernelWidth=2.5,src='NGC 2420',index=0):
         self.src = src
-        self.redFile = multi_module.getRedFile(src,dataType='hectoData')
+        self.srcFileName = src.replace(" ","_")
+        self.redFile = multi_module.getRedFile(src,dataType='hectoData',index=index)
         hdulist = fits.open(self.redFile)
         self.fibinfo = Table(hdulist[5].data)
         self.makeCleanNames()
@@ -42,22 +44,23 @@ class clusterSpec(object):
         Makes clean versions of the objtypes (no plus signs for use in file names)
         """
         cleanNames = []
-        problemStrings = ['O-','-','+']
-        replaceStrings = ['O_','_m','_p']
+        problemStrings = ['O-','-','+',r' ']
+        replaceStrings = ['O_','_m','_p','']
         for oneRow in self.fibinfo:
             newString = oneRow['OBJTYPE']
             for problemString, replaceString in zip(problemStrings,replaceStrings):
                 newString = replaceString.join(newString.split(problemString))
+            
             cleanNames.append(newString)
         self.fibinfo['cleanName'] = cleanNames
         
-    def prepForMK(self,showFig=False,nset = 3,waveStart=3800,waveEnd=5600):
+    def prepForMK(self,showSteps=False,nset = 3,waveStart=3800,waveEnd=5572):
         """
         Prepares the spectra for MKClass
         
         Parameters
         -----------------
-        showFig: bool
+        showSteps: bool
             Show a figure for the spectra rectification
         nset: int
             Number of regions over which to do polynomial fitting
@@ -73,6 +76,7 @@ class clusterSpec(object):
             x = self.wave2D[currentFib,:]
             y = self.flux2D[currentFib,:]
             yconv = convolve(y, datkern, boundary='extend')
+            targFileName = self.fibinfo['cleanName'][currentFib]
             
             ## Points with useful features for classification by mkClass
             keepPts = (x > waveStart) & (x < waveEnd)
@@ -111,7 +115,7 @@ class clusterSpec(object):
                 modelF2[setPts] = np.polyval(setPoly,outX[setPts])
             ynorm2 = ynorm1 / modelF2
             
-            if showFig == True:
+            if showSteps == True:
                 plt.close('all')
                 fig, (ax1, ax2, ax3) = plt.subplots(3,sharex=True)
                 ax1.semilogy(outX,trimY)
@@ -124,18 +128,33 @@ class clusterSpec(object):
                 ax3.set_ylabel('Norm Flux')
                 ax3.set_xlabel('Wavelength ($\AA$)')
                 
-                fig.savefig('plots/spec_rect/'+self.fibinfo['cleanName'][currentFib]+'_spec.pdf')
+                fig.savefig('plots/spec_rect_process/'+targFileName+'_spec.pdf')
                 fig.show()
-            pdb.set_trace()
-
-            #CorrectionFunc = np.interp(outX,xinterp,ymod)
-            outY = ynorm[keepPts]
-            #outY = ynorm[keepPts] / CorrectionFunc
-            #plt.plot(outX,outY)
-    
-            outTable = Table()
-            outTable['Wavelength_A']=outX
-            outTable['Flux']=outY
-            objFileName = self.fibinfo['cleanName'][currentFib]
-            ascii.write(outTable,'output_flux_cal/'+objFileName+'.txt',format='fixed_width_no_header',delimiter=' ')
+                pdb.set_trace()
+            
+            
+            ## Choose the directories in which to save plots
+            plotSaveDir = os.path.join('plots','spec_rect',self.srcFileName)
+            rectSpecSaveDir = os.path.join('output_rectified',self.srcFileName)
+            saveDirs = [plotSaveDir,rectSpecSaveDir]
+                        
+            for oneDir in saveDirs:
+                if os.path.exists(oneDir) == False:
+                    os.mkdir(oneDir)
+            
+            
+            fig,ax = plt.subplots(figsize=(8,4))
+            ax.plot(outX,ynorm2)
+            ax.set_xlabel('Wavelength ($\AA$)')
+            ax.set_ylabel('Normalized Flux')
+            fig.savefig(os.path.join(plotSaveDir,targFileName+'_spec.pdf'))
+            
+            t = Table()
+            t['Wavelength'] = outX
+            t['Normalized Flux'] = ynorm2
+            ascii.write(t,os.path.join(rectSpecSaveDir,targFileName+'_spec.txt'),format='fixed_width_no_header',
+                        delimiter=' ',overwrite=True)
+            
+            plt.close('all')
+            
         
