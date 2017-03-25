@@ -32,7 +32,7 @@ class clusterClassification(object):
     
     def get_phot(self,color='g-r',sType='G2 V'):
         """ Gets the photometry of the stars of interest """
-        hS = hm.clusterSpec()
+        hS = hm.clusterSpec(indices=[0,1])
         pS = ps.clusterPhot()
         if sType == None:
             lookRows = np.ones(len(self.classData),dtype=bool)
@@ -44,7 +44,8 @@ class clusterClassification(object):
         for oneRow in self.classData[lookRows]:
             baseName = os.path.basename(oneRow['SpFile'])
             namePrefix = os.path.splitext(baseName)[0]
-            fibinfo = hS.getbyObjName(namePrefix)
+            searchName = namePrefix.split("_spec")[0]
+            fibinfo = hS.getbyObjName(searchName)
             ra = fibinfo['RA']
             dec = fibinfo['DEC']
             posRA.append(ra)
