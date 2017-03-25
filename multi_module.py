@@ -35,8 +35,8 @@ def do_cm(fov=False):
     rowLook = cDat['Name'] == thisCluster
     colorShow = cDat['g-r_solar'][rowLook]
     
-    mkObj = mk.clusterClassification()
-    typeExplore = ['F9 V','G2 V','G5 V']
+    mkObj = mk.clusterClassification(mkOutFile='../classification/ngc2420_01_output_both.txt')
+    typeExplore = ['G0 V','G2 V','G5 V']
     colorArr = ['red','orange','green']
     for oneType,dispCol in zip(typeExplore,colorArr):
         mkObj.get_phot(sType=oneType)
@@ -54,6 +54,8 @@ def do_cm(fov=False):
     if fov == True:
         psObj.fig.savefig('plots/fov.pdf')
     else:
+        psObj.ax.set_xlim(-0.2,1.4)
+        psObj.ax.set_ylim(23,14)
         psObj.fig.savefig('plots/colormag.pdf')
     #psObj.fig.show()
     
