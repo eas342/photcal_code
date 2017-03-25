@@ -1,6 +1,6 @@
 from astropy.io import ascii
 from astropy.io import fits
-from astropy.table import Table
+from astropy.table import Table, vstack
 import es_gen
 from astropy.convolution import Gaussian1DKernel, convolve
 import numpy as np
@@ -15,19 +15,42 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 class clusterSpec(object):
-    def __init__(self,kernelWidth=2.5,src='NGC 2420',index=0):
+    def __init__(self,kernelWidth=2.5,src='NGC 2420',indices=[0]):
         self.src = src
         self.srcFileName = src.replace(" ","_")
-        self.redFile = multi_module.getRedFile(src,dataType='hectoData',index=index)
-        hdulist = fits.open(self.redFile)
-        self.fibinfo = Table(hdulist[5].data)
-        self.makeCleanNames()
+        self.redFiles = []
+        for oneInd in indices:
+            redFile = multi_module.getRedFile(src,dataType='hectoData',index=oneInd)
+            self.redFiles.append(redFile)
+            
+            thisFibinfo, thisWave2D, thisFlux2D, thisFluxErr2D = self.getFITSData(redFile)
+            if oneInd >= 1:
+                fibinfo = vstack([fibinfo,thisFibinfo])
+                wave2D = np.vstack([wave2D,thisWave2D])
+                flux2D = np.vstack([flux2D,thisFlux2D])
+                fluxErr2D = np.vstack([fluxErr2D,thisFluxErr2D])
+            else:
+                fibinfo, wave2D, flux2D, fluxErr2D = thisFibinfo, thisWave2D, thisFlux2D, thisFluxErr2D
+            
+        self.fibinfo = fibinfo
+        self.wave2D = wave2D
+        self.flux2D = flux2D
+        self.fluxErr2D = fluxErr2D
+        
         self.goodfib = np.array(es_gen.es_strmatch('O-*',self.fibinfo['OBJTYPE']))
-        self.wave2D = hdulist[0].data
-        self.flux2D = hdulist[1].data
-        self.fluxErr2D = 1/np.sqrt(hdulist[2].data)
+        self.makeCleanNames()
         self.kernelWidth=kernelWidth
     
+    def getFITSData(self,fileName):
+        """ 
+            Gets Hectospec fiber info, wavelength flux and error
+        """
+        hdulist = fits.open(fileName)
+        fibinfo = Table(hdulist[5].data)
+        wave2D = hdulist[0].data
+        flux2D = hdulist[1].data
+        fluxErr2D = 1/np.sqrt(hdulist[2].data)
+        return fibinfo, wave2D, flux2D, fluxErr2D
     
     def getbyObjName(self,objName):
         """ Search by object name
