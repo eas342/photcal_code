@@ -20,22 +20,30 @@ def getRedFile(src,index=0,dataType='hectoData'):
     clusterF = yaml.load(open('data/cluster_files.yaml'))
     return clusterF[src][dataType][index]
 
-def do_cm(fov=False,mkOutFile='../classification/ngc2420_01_output_both.txt',src='NGC 2420'):
+def getClusterInfo(src,cProperty):
+    """ Gets info on the cluster
+    """
+    cDat = ascii.read('data/cluster_data.csv')
+    rowLook = cDat['Name'] == src
+    return cDat[cProperty][rowLook]
+    
+
+def do_cm(fov=False,mkOutFile=None,src='NGC 2420'):
     """
     Does a color magnitude diagram
     """
-    psObj = ps.clusterPhot()
+    if mkOutFile is None:
+        mkOutFile = getRedFile(src,dataType='mkClassification')
+    
+    psObj = ps.clusterPhot(src=src)
     if fov == True:
         psObj.plot_fov()
     else:
         psObj.plot_cm()
-        
-    thisCluster = 'NGC 2420'
-    cDat = ascii.read('data/cluster_data.csv')
-    rowLook = cDat['Name'] == thisCluster
-    colorShow = cDat['g-r_solar'][rowLook]
     
-    mkObj = mk.clusterClassification(mkOutFile=mkOutFile)
+    colorShow = getClusterInfo(src,'g-r_solar')
+    
+    mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
     typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G5 V']
     colorArr = ['magenta','red','orange','green','olive']
     for oneType,dispCol in zip(typeExplore,colorArr):
@@ -51,12 +59,13 @@ def do_cm(fov=False,mkOutFile='../classification/ngc2420_01_output_both.txt',src
         
     psObj.ax.legend(loc='best',frameon=True)
     
+    srcCleanName = src.replace(r" ",r"_")
     if fov == True:
-        psObj.fig.savefig('plots/fov.pdf')
+        psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf')
     else:
         psObj.ax.set_xlim(-0.2,1.4)
         psObj.ax.set_ylim(23,14)
-        psObj.fig.savefig('plots/colormag.pdf')
+        psObj.fig.savefig('plots/colormag'+srcCleanName+'.pdf')
     #psObj.fig.show()
     
 def do_fov():

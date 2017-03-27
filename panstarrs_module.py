@@ -3,11 +3,16 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import hecto_module as hm
 import numpy as np
+import multi_module
 
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry """
     
-    def __init__(self,photFile='../pan_starrs/NGC2420.txt',racen=114.5958,deccen=21.573):
+    def __init__(self,src='NGC 2420'):
+        self.src = src
+        photFile = multi_module.getRedFile(src,dataType='panStarrsData')
+        racen = multi_module.getClusterInfo(src,'RA') ## Decimal degrees
+        deccen = multi_module.getClusterInfo(src,'Dec') ## Decimal degrees
         self.photFile = photFile
         self.dat = ascii.read(photFile)
         self.racen = racen

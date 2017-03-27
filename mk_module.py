@@ -33,8 +33,13 @@ class clusterClassification(object):
     
     def get_phot(self,color='g-r',sType='G2 V'):
         """ Gets the photometry of the stars of interest """
-        hS = hm.clusterSpec(indices=[0,1])
-        pS = ps.clusterPhot()
+        if self.src == 'NGC 2420':
+            defaultIndices = [0,1]
+        else:
+            defaultIndices = [0]
+        
+        hS = hm.clusterSpec(src=self.src,indices=defaultIndices)
+        pS = ps.clusterPhot(src=self.src)
         if sType == None:
             lookRows = np.ones(len(self.classData),dtype=bool)
         else:
