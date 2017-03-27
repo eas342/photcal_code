@@ -20,7 +20,7 @@ def getRedFile(src,index=0,dataType='hectoData'):
     clusterF = yaml.load(open('data/cluster_files.yaml'))
     return clusterF[src][dataType][index]
 
-def do_cm(fov=False):
+def do_cm(fov=False,mkOutFile='../classification/ngc2420_01_output_both.txt',src='NGC 2420'):
     """
     Does a color magnitude diagram
     """
@@ -35,9 +35,9 @@ def do_cm(fov=False):
     rowLook = cDat['Name'] == thisCluster
     colorShow = cDat['g-r_solar'][rowLook]
     
-    mkObj = mk.clusterClassification(mkOutFile='../classification/ngc2420_01_output_both.txt')
-    typeExplore = ['G0 V','G2 V','G5 V']
-    colorArr = ['red','orange','green']
+    mkObj = mk.clusterClassification(mkOutFile=mkOutFile)
+    typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G5 V']
+    colorArr = ['magenta','red','orange','green','olive']
     for oneType,dispCol in zip(typeExplore,colorArr):
         mkObj.get_phot(sType=oneType)
         if fov == True:
