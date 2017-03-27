@@ -8,15 +8,16 @@ import multi_module
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry """
     
-    def __init__(self,src='NGC 2420'):
+    def __init__(self,src='NGC 2420',clusterRad=7.5):
         self.src = src
         photFile = multi_module.getRedFile(src,dataType='panStarrsData')
         racen = multi_module.getClusterInfo(src,'RA') ## Decimal degrees
         deccen = multi_module.getClusterInfo(src,'Dec') ## Decimal degrees
         self.photFile = photFile
         self.dat = ascii.read(photFile)
-        self.racen = racen
-        self.deccen = deccen
+        self.racen = racen ## Decimal degrees
+        self.deccen = deccen ## Decimal degrees
+        self.clusterRad = multi_module.getClusterInfo(src,'Cluster Rad (arcmin)')
         self.get_cluster_pt()
     
     def lookup_src(self,ra,dec):
@@ -30,7 +31,7 @@ class clusterPhot(object):
         else:
             return self.dat[rowIndex]
     
-    def get_cluster_pt(self,dist=7.5,ra='ra',dec='dec'):
+    def get_cluster_pt(self,ra='ra',dec='dec'):
         """ 
         Gets the cluster points from the distance to center
         
@@ -42,7 +43,8 @@ class clusterPhot(object):
         deltaRA = self.racen - self.dat[ra]
         deltaDEC = self.deccen - self.dat[dec]
         deltaDistApprox = np.sqrt(deltaRA**2 * np.cos(self.dat[dec])**2 + deltaDEC**2)
-        self.cpoints = deltaDistApprox < dist/60.
+        dist= self.clusterRad / 60.
+        self.cpoints = deltaDistApprox < dist
         
     
     def plot_cm(self,color1='g',color2='r',mag='g',):
