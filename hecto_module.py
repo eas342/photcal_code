@@ -89,7 +89,8 @@ class clusterSpec(object):
             Number of regions over which to do polynomial fitting
         
         """
-        datkern = Gaussian1DKernel(stddev=self.kernelWidth)
+        if self.kernelWidth != 0:
+            datkern = Gaussian1DKernel(stddev=self.kernelWidth)
         
         ## Wavelength locations for the regions over which to do polynomials
         waveLocs = np.linspace(waveStart,waveEnd,nset+1)
@@ -98,7 +99,11 @@ class clusterSpec(object):
             #fig, ax = plt.subplots(figsize=(15,4))
             x = self.wave2D[currentFib,:]
             y = self.flux2D[currentFib,:]
-            yconv = convolve(y, datkern, boundary='extend')
+            if self.kernelWidth ==0:
+                yconv = y
+            else:
+                yconv = convolve(y, datkern, boundary='extend')
+            
             targFileName = self.fibinfo['cleanName'][currentFib]
             
             ## Points with useful features for classification by mkClass
