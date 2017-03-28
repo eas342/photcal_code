@@ -52,12 +52,12 @@ class clusterClassification(object):
             namePrefix = os.path.splitext(baseName)[0]
             searchName = namePrefix.split("_spec")[0]
             fibinfo = hS.getbyObjName(searchName)
-            ra = fibinfo['RA']
-            dec = fibinfo['DEC']
+            ra = float(fibinfo['RA'])
+            dec = float(fibinfo['DEC'])
             posRA.append(ra)
             posDec.append(dec)
             phot = pS.lookup_src(ra,dec)
-            names.append(fibinfo['OBJTYPE'])
+            names.append(str(fibinfo['OBJTYPE']))
             colors.append(phot['g'] - phot['r'])
             mags.append(phot['g'])
             spTypeList.append(oneRow['SpType'])
