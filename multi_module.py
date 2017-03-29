@@ -28,7 +28,8 @@ def getClusterInfo(src,cProperty):
     return cDat[cProperty][rowLook]
     
 
-def do_cm(fov=False,mkOutFile=None,src='NGC 2420'):
+def do_cm(fov=False,mkOutFile=None,src='NGC 2420',
+          custX=[-0.2,1.4],custY=[23,14]):
     """
     Does a color magnitude diagram
     """
@@ -63,11 +64,17 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420'):
     if fov == True:
         psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf')
     else:
-        psObj.ax.set_xlim(-0.2,1.4)
-        psObj.ax.set_ylim(23,14)
+        psObj.ax.set_xlim(custX[0],custX[1])
+        psObj.ax.set_ylim(custY[0],custY[1])
         psObj.fig.savefig('plots/colormag'+srcCleanName+'.pdf')
     #psObj.fig.show()
-    
+
+def azProposal_plots():
+    """
+         Custom plots for Steward observatory proposal
+    """
+    do_cm(custX=[0.1,0.8],custY=[21,14])
+
 def do_fov():
     """
     Shows the location of stars in the field 
