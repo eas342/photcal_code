@@ -77,7 +77,7 @@ class clusterSpec(object):
             cleanNames.append(newString)
         self.fibinfo['cleanName'] = cleanNames
         
-    def prepForMK(self,showSteps=False,nset = 8,waveStart=3800,waveEnd=5572):
+    def prepForMK(self,showSteps=False,nset = 8,waveStart=3805,waveEnd=5572):
         """
         Prepares the spectra for MKClass
         
@@ -95,7 +95,7 @@ class clusterSpec(object):
         ## Wavelength locations for the spline knots, skip the first/last ones
         knots = np.linspace(waveStart,waveEnd,nset+1)[1:-1]
         
-        for currentFib in self.goodfib[5:]:
+        for currentFib in self.goodfib:
             #fig, ax = plt.subplots(figsize=(15,4))
             x = self.wave2D[currentFib,:]
             y = self.flux2D[currentFib,:]
