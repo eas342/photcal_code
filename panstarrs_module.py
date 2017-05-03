@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import hecto_module as hm
 import numpy as np
 import multi_module
+import pdb
 
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry """
@@ -47,7 +48,7 @@ class clusterPhot(object):
         self.cpoints = deltaDistApprox < dist
         
     
-    def plot_cm(self,color1='g',color2='r',mag='g',):
+    def plot_cm(self,color1='g',color2='r',mag='g',figsize=None):
         """ 
         Plots a color-magnitude diagram from the photometry 
         
@@ -60,7 +61,8 @@ class clusterPhot(object):
         mag: str
             Magnitude photometric band
         """
-        fig, ax = plt.subplots()
+        
+        fig, ax = plt.subplots(figsize=figsize)
         cdat = self.dat[self.cpoints]
         
         ax.plot(cdat[color1] - cdat[color2],cdat[mag],'.',rasterized=True,label='')

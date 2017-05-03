@@ -28,8 +28,8 @@ def getClusterInfo(src,cProperty):
     return cDat[cProperty][rowLook]
     
 
-def do_cm(fov=False,mkOutFile=None,src='NGC 2420',
-          custX=[-0.2,1.4],custY=[23,14]):
+def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
+          figsize=None):
     """
     Does a color magnitude diagram
     """
@@ -40,7 +40,7 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',
     if fov == True:
         psObj.plot_fov()
     else:
-        psObj.plot_cm()
+        psObj.plot_cm(figsize=figsize)
     
     colorShow = getClusterInfo(src,'g-r_solar')
     
@@ -64,16 +64,23 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',
     if fov == True:
         psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf')
     else:
+        custX=[-0.2,1.4]
+        custY=[23,14]
         psObj.ax.set_xlim(custX[0],custX[1])
         psObj.ax.set_ylim(custY[0],custY[1])
         psObj.fig.savefig('plots/colormag'+srcCleanName+'.pdf')
+    if returnAx == True:
+        return psObj.fig, psObj.ax
     #psObj.fig.show()
 
 def azProposal_plots():
     """
          Custom plots for Steward observatory proposal
     """
-    do_cm(custX=[0.1,0.8],custY=[21,14])
+    fig, ax = do_cm(returnAx=True,figsize=(4,3.7))
+    ax.set_xlim(0.1,0.9)
+    ax.set_ylim(20,14)
+    fig.savefig('plots/colormag_proposal.pdf',bbox_inches='tight')
 
 def do_fov():
     """
