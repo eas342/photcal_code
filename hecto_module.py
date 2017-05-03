@@ -77,7 +77,7 @@ class clusterSpec(object):
             cleanNames.append(newString)
         self.fibinfo['cleanName'] = cleanNames
         
-    def prepForMK(self,showSteps=False,nset = 3,waveStart=3800,waveEnd=5572):
+    def prepForMK(self,showSteps=False,nset = 8,waveStart=3800,waveEnd=5572):
         """
         Prepares the spectra for MKClass
         
@@ -92,10 +92,10 @@ class clusterSpec(object):
         if self.kernelWidth != 0:
             datkern = Gaussian1DKernel(stddev=self.kernelWidth)
         
-        ## Wavelength locations for the regions over which to do polynomials
-        waveLocs = np.linspace(waveStart,waveEnd,nset+1)
+        ## Wavelength locations for the spline knots, skip the first/last ones
+        knots = np.linspace(waveStart,waveEnd,nset+1)[1:-1]
         
-        for currentFib in self.goodfib:
+        for currentFib in self.goodfib[5:]:
             #fig, ax = plt.subplots(figsize=(15,4))
             x = self.wave2D[currentFib,:]
             y = self.flux2D[currentFib,:]
@@ -114,33 +114,19 @@ class clusterSpec(object):
             ## Do a fit in log space so it won't give you zeros
             yLog = np.log10(trimY)
             
-            modelF1 = np.zeros_like(outX)
-            
-            setPtsArr = []
-            for indSet in range(nset):
-                setPts = (outX > waveLocs[indSet]) & (outX <= waveLocs[indSet+1])
-                setPtsArr.append(setPts)
-                setPoly = es_gen.robust_poly(outX[setPts],yLog[setPts],8,sigreject=2.)
-                modelF1[setPts] = 10**np.polyval(setPoly,outX[setPts])
+            spline1 = es_gen.robust_poly(outX,yLog,3,sigreject=2.,
+                                         knots=knots,useSpline=True)
+            modelF1 = 10**spline1(outX)
             
             ynorm1 = trimY / modelF1
             
             ## Choose the points that are above 1.0 for the continuum
-            contPoints = (ynorm1 > 1.0)
+            contPoints = (ynorm1 > 0.95)
             
-            modelF2 = np.zeros_like(outX)
-            fitPtsArr = []
-            for indSet in range(nset):
-                setPts = (setPtsArr[indSet])
-                fitPts = setPts & contPoints ## continuum and part of the set
-                fitPtsArr.append(fitPts)
-                ## add in the point previous point for continuity
-                if indSet >= 1:
-                    ## Get the maximum index of the previous set of fit points
-                    prevPoint = np.argmax(outX[fitPtsArr[indSet-1]])
-                    
-                setPoly = es_gen.robust_poly(outX[fitPts],ynorm1[fitPts],8,sigreject=3.)
-                modelF2[setPts] = np.polyval(setPoly,outX[setPts])
+            spline2 = es_gen.robust_poly(outX[contPoints],ynorm1[contPoints],3,sigreject=3.,
+                                        knots=knots,useSpline=True)
+            modelF2 = spline2(outX)
+            
             ynorm2 = ynorm1 / modelF2
             
             if showSteps == True:
