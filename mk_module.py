@@ -9,9 +9,15 @@ import os
 class clusterClassification(object):
     """ Designed to get the data from the mkclass output """
     def __init__(self,mkOutFile='../classification/ngc2420_01_corrected_names.txt',src='NGC 2420'):
+        self.mkOutFile = mkOutFile
         self.classData = ascii.read(mkOutFile,names=['SpFile','SpType','SpQuality','junk'])
+        self.classData.sort('SpFile')
         self.src = src
-        
+    
+    def save_sorted(self):
+        baseNamePrefix = os.path.splitext(os.path.basename(self.mkOutFile))[0]
+        self.classData.write('../classification/sorted/'+baseNamePrefix+'.csv')
+    
     def get_counts(self):
         """
         Make a table of each spectral type and how many stars fit that spectral type
