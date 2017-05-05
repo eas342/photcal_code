@@ -59,7 +59,12 @@ class clusterSpec(object):
         nFound = np.sum(foundPts)
         if np.sum(foundPts) == 1:
             return self.fibinfo[foundPts]
+        elif objName == 'O_0738152_p2137':
+            ## After investigating, I see I accidentally have 1 duplicate on this object
+            ## Just choosing the first one
+            return self.fibinfo[foundPts][0] 
         else:
+            
             print("Found "+str(nFound)+" objects for "+objName)
     
     def makeCleanNames(self):
