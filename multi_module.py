@@ -45,8 +45,8 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     colorShow = getClusterInfo(src,'g-r_solar')
     
     mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
-    typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G5 V']
-    colorArr = ['magenta','red','orange','green','olive']
+    typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G4 V','G5 V','G8 V']
+    colorArr = ['magenta','red','orange','green','olive','yellow','maroon']
     for oneType,dispCol in zip(typeExplore,colorArr):
         mkObj.get_phot(sType=oneType)
         if fov == True:
