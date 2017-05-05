@@ -161,6 +161,7 @@ class clusterSpec(object):
             ax.plot(outX,ynorm2)
             ax.set_xlabel('Wavelength ($\AA$)')
             ax.set_ylabel('Normalized Flux')
+            ax.set_ylim(0.1,1.3)
             fig.savefig(os.path.join(plotSaveDir,targFileName+'_spec.pdf'))
             
             t = Table()
