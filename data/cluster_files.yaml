@@ -19,4 +19,8 @@ NGC 6811:
       - ../hectospec_data/2017.0529/reduction/0100/spHect-catalog_NGC6811_1.2024-0100.fits
       - ../hectospec_data/2017.0529/reduction/0100/spHect-catalog_NGC6811_2.2030-0100.fits
    panStarrsData:
-      - ../pan_starrs/NGC6811.txt
+      - ../pan_starrs/NGC6811_ps.fits
+   otherPhot:
+      - ../pan_starrs/NGC6811_UBVRI.fits
+   mkClassification:
+      - ../classification/ngc6811_output.txt
