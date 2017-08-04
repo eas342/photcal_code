@@ -5,3 +5,4 @@
 *.xlsx
 output_flux_cal/O_*.txt
 output_rectified/*/*.txt
+lists/*.csv

@@ -1,5 +1,5 @@
 from astropy.io import ascii
-from astropy.table import Table
+from astropy.table import Table, vstack
 from astropy.io import ascii
 import numpy as np
 import hecto_module as hm
@@ -72,6 +72,23 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     if returnAx == True:
         return psObj.fig, psObj.ax
     #psObj.fig.show()
+
+def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
+    """ Make a list of all near-G2V sources for all clusters"""
+    clustFiles = yaml.load(open('data/cluster_files.yaml'))
+    for oneClust in clustFiles.keys():
+        mkOutFile = clustFiles[oneClust]['mkClassification']
+        mkObj = mk.clusterClassification(mkOutFile=mkOutFile[0],src=oneClust)
+        photDat = None
+        for oneType in sTypes:
+            #pdb.set_trace()
+            mkObj.get_phot(sType=oneType)
+            if len(mkObj.photdat) > 0:
+                if photDat == None:
+                    photDat = mkObj.photdat
+                else:
+                    photDat = vstack([photDat,mkObj.photdat])
+        photDat.write('lists/g2vs'+oneClust+'.csv',overwrite=True)
 
 def azProposal_plots():
     """
