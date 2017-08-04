@@ -1,21 +1,36 @@
 from astropy.io import ascii
 from astropy.io import fits
+from astropy.table import Table
 import matplotlib.pyplot as plt
 import hecto_module as hm
 import numpy as np
 import multi_module
 import pdb
+import os
 
 class clusterPhot(object):
-    """ Creates a cluster object for Pan-Starrs Photometry """
+    """ Creates a cluster object for Pan-Starrs Photometry
+    Also works with photometry for other sources
+    """
     
-    def __init__(self,src='NGC 2420',clusterRad=7.5):
+    def __init__(self,src='NGC 2420'):
         self.src = src
         photFile = multi_module.getRedFile(src,dataType='panStarrsData')
         racen = multi_module.getClusterInfo(src,'RA') ## Decimal degrees
         deccen = multi_module.getClusterInfo(src,'Dec') ## Decimal degrees
         self.photFile = photFile
-        self.dat = ascii.read(photFile)
+        if os.path.splitext(self.photFile)[-1] == '.fits':
+            HDUList = fits.open(self.photFile)
+            self.dat = Table(HDUList[1].data)
+            if '_RA' in self.dat.colnames:
+                self.dat['ra'] = self.dat['_RA']
+            if '_DE' in self.dat.colnames:
+                self.dat['dec'] = self.dat['_DE']
+            
+            HDUList.close()
+        else:
+            self.dat = ascii.read(self.photFile)
+        
         self.racen = racen ## Decimal degrees
         self.deccen = deccen ## Decimal degrees
         self.clusterRad = multi_module.getClusterInfo(src,'Cluster Rad (arcmin)')
@@ -29,6 +44,7 @@ class clusterPhot(object):
         rowIndex, minimumDist = np.argmin(deltaDistApprox), np.min(deltaDistApprox)
         if minimumDist > 0.08 / 3600.:
             print('Warning, closest source is '+str(minimumDist*3600.)+' arcsec for'+str(ra)+' '+str(dec))
+            return None
         else:
             return self.dat[rowIndex]
     
