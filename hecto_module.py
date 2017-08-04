@@ -57,15 +57,19 @@ class clusterSpec(object):
         """
         foundPts = self.fibinfo['cleanName'] == objName
         nFound = np.sum(foundPts)
-        if np.sum(foundPts) == 1:
-            return self.fibinfo[foundPts]
-        elif objName == 'O_0738152_p2137':
-            ## After investigating, I see I accidentally have 1 duplicate on this object
+        if nFound == 1:
+            useIndex = np.where(foundPts)[0][0]
+            return self.fibinfo[useIndex]
+        elif nFound > 1:
+            ## After investigating, I see I accidentally have 1 duplicate on O_0738152_p2137
+            ## this object
             ## Just choosing the first one
-            return self.fibinfo[foundPts][0] 
+            warnings.warn('Found '+str(nFound)+' Hectospec spectra objects for '+objName+'. Choosing the first one.')
+            useIndex = np.where(foundPts)[0][0]
+            return self.fibinfo[useIndex]
         else:
-            
-            print("Found "+str(nFound)+" objects for "+objName)
+            warnings.warn("Found "+str(nFound)+" objects for "+objName)
+            return None
     
     def makeCleanNames(self):
         """
