@@ -41,6 +41,8 @@ class clusterClassification(object):
         """ Gets the photometry of the stars of interest """
         if self.src == 'NGC 2420':
             defaultIndices = [0,1]
+        elif self.src == 'NGC 6811':
+            defaultIndices = [0,1]
         else:
             defaultIndices = [0]
         
@@ -63,9 +65,19 @@ class clusterClassification(object):
             posRA.append(ra)
             posDec.append(dec)
             phot = pS.lookup_src(ra,dec)
+            
             names.append(str(fibinfo['OBJTYPE']))
-            colors.append(phot['g'] - phot['r'])
-            mags.append(phot['g'])
+            if phot is None:
+                colors.append(np.nan)
+                mags.append(np.nan)
+            else:
+                if ('g' in phot.colnames) & ('r' in phot.colnames):
+                    colors.append(phot['g'] - phot['r'])
+                    mags.append(phot['g'])
+                else:
+                    colors.append(np.nan)
+                    mags.append(np.nan)
+            
             spTypeList.append(oneRow['SpType'])
             
         t['Name'] = names
