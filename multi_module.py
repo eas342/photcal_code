@@ -88,7 +88,7 @@ def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
                     photDat = mkObj.photdat
                 else:
                     photDat = vstack([photDat,mkObj.photdat])
-        photDat.write('lists/g2vs'+oneClust+'.csv',overwrite=True)
+        photDat.write('lists/g_stars'+oneClust+'.csv',overwrite=True)
 
 def azProposal_plots():
     """
