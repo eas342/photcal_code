@@ -9,6 +9,8 @@ import pdb
 import os
 import pandas as pd
 import yaml
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
 def make_cluster_csv():
     """ Makes a CSV from the cluster file """
@@ -88,6 +90,9 @@ def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
                     photDat = mkObj.photdat
                 else:
                     photDat = vstack([photDat,mkObj.photdat])
+        
+        coord = SkyCoord(ra=photDat['ra'] * u.degree,dec=photDat['dec'] * u.degree)
+        photDat['coord hms'] = coord.to_string('hmsdms',sep=' ')
         photDat.write('lists/g_stars'+oneClust+'.csv',overwrite=True)
 
 def azProposal_plots():
