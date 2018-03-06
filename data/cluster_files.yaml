@@ -5,6 +5,8 @@ NGC 2420:
       - ../hectospec_data/2016.1125/reduction/0100/spHect-catalog_second_round_NGC2420_1.0767-0100.fits
    panStarrsData:
       - ../pan_starrs/NGC2420.txt
+   UKIRTData:
+      - ../ukirt_data/merged_catalogs/NGC_2420_cat.fits
    mkClassification:
       - ../classification/ngc2420_01_output_both.txt
 NGC 2506:
@@ -12,6 +14,8 @@ NGC 2506:
       - ../hectospec_data/2016.1126/reduction/0100/spHect-catalog_NGC2506_1.0820-0100.fits
    panStarrsData:
       - ../pan_starrs/NGC2506.txt
+   UKIRTData:
+      - ../ukirt_data/merged_catalogs/NGC_2506_cat.fits
    mkClassification:
       - ../classification/ngc2506_01_output.txt
 NGC 6811:
@@ -20,6 +24,8 @@ NGC 6811:
       - ../hectospec_data/2017.0529/reduction/0100/spHect-catalog_NGC6811_2.2030-0100.fits
    panStarrsData:
       - ../pan_starrs/NGC6811_ps.fits
+   UKIRTData:
+      - ../ukirt_data/merged_catalogs/NGC_6811_cat.fits
    otherPhot:
       - ../pan_starrs/NGC6811_UBVRI.fits
    mkClassification:

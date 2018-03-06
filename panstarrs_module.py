@@ -8,24 +8,35 @@ import multi_module
 import pdb
 import os
 
+## Dictionary to get correct coordinate column coordinates
+coordinateDict = {'_RA':'ra','Ra (deg)':'ra',
+                  '_DE':'dec','Dec (deg)':'dec'}
+
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry
     Also works with photometry for other sources
+    Specific the photometry with PhotType
+    
+    Paraemters
+    ---------------
+    photType: str
+        Photometry type
+         - `panStarrsData` - Pan Starrs griz
+         - `UKIRTData` - UKIRT JHK
     """
     
-    def __init__(self,src='NGC 2420'):
+    def __init__(self,src='NGC 2420',photType='panStarrsData'):
         self.src = src
-        photFile = multi_module.getRedFile(src,dataType='panStarrsData')
+        photFile = multi_module.getRedFile(src,dataType=photType)
         racen = multi_module.getClusterInfo(src,'RA') ## Decimal degrees
         deccen = multi_module.getClusterInfo(src,'Dec') ## Decimal degrees
         self.photFile = photFile
         if os.path.splitext(self.photFile)[-1] == '.fits':
             HDUList = fits.open(self.photFile)
             self.dat = Table(HDUList[1].data)
-            if '_RA' in self.dat.colnames:
-                self.dat['ra'] = self.dat['_RA']
-            if '_DE' in self.dat.colnames:
-                self.dat['dec'] = self.dat['_DE']
+            for oneKey in coordinateDict.keys():
+                if oneKey in self.dat.colnames:
+                    self.dat[coordinateDict[oneKey]] = self.dat[oneKey]
             
             HDUList.close()
         else:
