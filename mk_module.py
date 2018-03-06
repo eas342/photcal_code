@@ -2,7 +2,7 @@ from astropy.io import ascii
 from astropy.table import Table
 import numpy as np
 import hecto_module as hm
-import panstarrs_module as ps
+import phot_module as ps
 import pdb
 import os
 

@@ -3,7 +3,7 @@ from astropy.table import Table, vstack
 from astropy.io import ascii
 import numpy as np
 import hecto_module as hm
-import panstarrs_module as ps
+import phot_module as ps
 import mk_module as mk
 import pdb
 import os

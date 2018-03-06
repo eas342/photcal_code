@@ -1,6 +1,8 @@
 from astropy.io import ascii
 from astropy.io import fits
 from astropy.table import Table
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 import matplotlib.pyplot as plt
 import hecto_module as hm
 import numpy as np
@@ -8,9 +10,12 @@ import multi_module
 import pdb
 import os
 
+
 ## Dictionary to get correct coordinate column coordinates
 coordinateDict = {'_RA':'ra','Ra (deg)':'ra',
                   '_DE':'dec','Dec (deg)':'dec'}
+
+
 
 class clusterPhot(object):
     """ Creates a cluster object for Pan-Starrs Photometry
@@ -42,19 +47,27 @@ class clusterPhot(object):
         else:
             self.dat = ascii.read(self.photFile)
         
+        self.photCoor = SkyCoord(ra=self.dat['ra'] * u.degree,
+                                 dec=self.dat['dec'] * u.degree)
+        
         self.racen = racen ## Decimal degrees
         self.deccen = deccen ## Decimal degrees
-        self.clusterRad = multi_module.getClusterInfo(src,'Cluster Rad (arcmin)')
+        self.cluster_cen = SkyCoord(ra=racen * u.degree,dec=deccen * u.degree)
+        
+        self.clusterRad = multi_module.getClusterInfo(src,'Cluster Rad (arcmin)') * u.arcmin
         self.get_cluster_pt()
+        
+        ## Threshold for target matching
+        self.targMatch = 0.2 * u.arcsec
     
     def lookup_src(self,ra,dec):
         """ Look up a source from the RA and Dec. Expects these to both be in degrees"""
-        deltaRA = ra - self.dat['ra']
-        deltaDEC = dec - self.dat['dec']
-        deltaDistApprox = np.sqrt(deltaRA**2 / np.sin(self.dat['dec'])**2 + deltaDEC**2)
-        rowIndex, minimumDist = np.argmin(deltaDistApprox), np.min(deltaDistApprox)
-        if minimumDist > 0.08 / 3600.:
-            print('Warning, closest source is '+str(minimumDist*3600.)+' arcsec for'+str(ra)+' '+str(dec))
+        
+        coor = SkyCoord(ra=ra * u.degree,dec=dec * u.degree)
+        rowIndex, minimumDist, d2d = coor.match_to_catalog_sky(self.photCoor)
+        
+        if minimumDist > self.targMatch:
+            print('Warning, closest source is '+str(minimumDist.arcsec)+' arcsec for'+str(ra)+' '+str(dec))
             return None
         else:
             return self.dat[rowIndex]
@@ -68,11 +81,9 @@ class clusterPhot(object):
         dist: float
             Distance in arc-minutes
         """
-        deltaRA = self.racen - self.dat[ra]
-        deltaDEC = self.deccen - self.dat[dec]
-        deltaDistApprox = np.sqrt(deltaRA**2 * np.cos(self.dat[dec])**2 + deltaDEC**2)
-        dist= self.clusterRad / 60.
-        self.cpoints = deltaDistApprox < dist
+        dist = self.cluster_cen.separation(self.photCoor)
+        
+        self.cpoints = dist < self.clusterRad
         
     
     def plot_cm(self,color1='g',color2='r',mag='g',figsize=None):
