@@ -48,6 +48,8 @@ class clusterClassification(object):
         
         hS = hm.clusterSpec(src=self.src,indices=defaultIndices)
         pS = ps.clusterPhot(src=self.src)
+        uK = ps.clusterPhot(src=self.src,photType='UKIRTData')
+        
         if sType == None:
             lookRows = np.ones(len(self.classData),dtype=bool)
         else:
@@ -55,6 +57,9 @@ class clusterClassification(object):
         t = Table()
         names, colors, mags, spTypeList = [], [], [], []
         posRA, posDec = [], []
+        
+        kmag, kmag_e = [], []
+        
         for oneRow in self.classData[lookRows]:
             baseName = os.path.basename(oneRow['SpFile'])
             namePrefix = os.path.splitext(baseName)[0]
@@ -78,6 +83,14 @@ class clusterClassification(object):
                     colors.append(np.nan)
                     mags.append(np.nan)
             
+            uPhot = uK.lookup_src(ra,dec)
+            if uPhot is None:
+                kmag.append(np.nan)
+                kmag_e.append(np.nan)
+            else:
+                kmag.append(uPhot['K mag'])
+                kmag_e.append(uPhot['K mag err'])
+            
             spTypeList.append(oneRow['SpType'])
             
         t['Name'] = names
@@ -86,5 +99,7 @@ class clusterClassification(object):
         t['SpType'] = spTypeList
         t['ra'] = posRA
         t['dec'] = posDec
+        t['K mag'] = kmag
+        t['K mag err'] = kmag_e
         self.photdat = t
     
