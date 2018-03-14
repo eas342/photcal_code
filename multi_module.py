@@ -75,6 +75,30 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
         return psObj.fig, psObj.ax
     #psObj.fig.show()
 
+def cm_keck_proposal(src='NGC 2506'):
+    """ Plots a color magnitude diagram for Keck proposal """
+    srcCleanName = src.replace(r" ",r"_")
+    
+    p = ps.clusterPhot(src='NGC 2506')
+    
+    colorShow = getClusterInfo(src,'g-r_solar')
+    p.plot_cm()
+    p.ax.axvline(x=colorShow,linewidth=7.,alpha=0.3,color='red')
+    
+    coorFile = '../pan_starrs/pro/output/lris_targsNGC2506.csv'
+    dat = ascii.read(coorFile)
+    pts = dat['GROUP'] == 1
+    p.ax.scatter(dat['G_M_R'][pts],dat['G'][pts],zorder=10,
+                facecolors='none',edgecolors='red')
+    
+    p.ax.set_xlim(0,1.0)
+    p.ax.set_ylim(21,14)
+    
+    p.fig.set_figwidth(5)
+    p.fig.set_figheight(4)
+    
+    p.fig.savefig('plots/colormag_selection_'+srcCleanName+'.pdf')
+
 def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
     """ Make a list of all near-G2V sources for all clusters"""
     clustFiles = yaml.load(open('data/cluster_files.yaml'))
