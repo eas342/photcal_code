@@ -30,6 +30,18 @@ def getClusterInfo(src,cProperty):
     return cDat[cProperty][rowLook]
     
 
+def prep_all_spec():
+    """ Prepares all Hectospec spectra for mkClass"""
+    clustFiles = yaml.load(open('data/cluster_files.yaml'))
+    cDat = ascii.read('data/cluster_data.csv')
+    for cInd, oneClust in enumerate(clustFiles.keys()):
+        nFiles = len(clustFiles[oneClust]['hectoData'])
+        indSearch = np.arange(nFiles)
+        hS = hm.clusterSpec(kernelWidth=cDat['Kernel Width'][cInd],
+                            src=oneClust,indices=indSearch)
+        hS.prepForMK()
+    
+
 def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
           figsize=None,photType='panStarrsData'):
     """
