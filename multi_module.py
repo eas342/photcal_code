@@ -31,9 +31,26 @@ def getClusterInfo(src,cProperty):
     
 
 def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
-          figsize=None):
+          figsize=None,photType='panStarrsData'):
     """
     Does a color magnitude diagram
+    
+    
+    Parameters
+    -----------
+    fov: bool
+          Show a field of view plot instead of the color magnitude diagram?
+    mkOutFile: str
+          Specify a different mkclass classification file.
+          If None, then it will use te default for the object
+    src: str
+          The cluster source (e.g. "NGC 2506")
+    returnAx: bool
+          Return the axes object
+    figsize: tuple
+          The figure size as (x,y). If None, it will use defaults.
+    photType: str
+          The type of photometry 
     """
     if mkOutFile is None:
         mkOutFile = getRedFile(src,dataType='mkClassification')
