@@ -15,7 +15,7 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
 class clusterSpec(object):
-    def __init__(self,kernelWidth=2.5,src='NGC 2420',indices=[0]):
+    def __init__(self,kernelWidth=3.3,src='NGC 2420',indices=[0]):
         self.src = src
         self.srcFileName = src.replace(" ","_")
         self.redFiles = []
