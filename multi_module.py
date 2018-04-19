@@ -71,6 +71,7 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
           'T Letter': F,G,K broadly
           'T Class': G0, G2, G5
           'Lum Class': V, IV-V, III, etc.
+          'Candidates'
     """
     if mkOutFile is None:
         mkOutFile = getRedFile(src,dataType='mkClassification')
@@ -100,6 +101,17 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     
     mkObj.get_phot_prev()
     allPhotDat = mkObj.photdat
+    
+    if groupType == 'Candidates':
+        if src == 'NGC 2420':
+            widerT=False
+        else:
+            widerT=True
+        ## Need a wider T range since we don't have as much data
+        ## on NGC 2506 and NGC 6811 yet
+        
+        allPhotDat = mk.get_candidates(allPhotDat,widerT=widerT)
+        typeExplore = [groupType]
     
     for oneType,dispCol in zip(typeExplore,colorArr):
         #mkObj.get_phot(sType=oneType,sCategory=sCategory)
@@ -166,15 +178,14 @@ def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
     for oneClust in clustFiles.keys():
         mkOutFile = clustFiles[oneClust]['mkClassification']
         mkObj = mk.clusterClassification(mkOutFile=mkOutFile[0],src=oneClust)
-        photDat = None
-        for oneType in sTypes:
-            #pdb.set_trace()
-            mkObj.get_phot(sType=oneType)
-            if len(mkObj.photdat) > 0:
-                if photDat == None:
-                    photDat = mkObj.photdat
-                else:
-                    photDat = vstack([photDat,mkObj.photdat])
+        mkObj.get_phot_prev()
+        
+        if oneClust == 'NGC 2420':
+            widerT=False
+        else:
+            widerT=True
+        
+        photDat = mk.get_candidates(mkObj.photdat,widerT=widerT)
         
         coord = SkyCoord(ra=photDat['ra'] * u.degree,dec=photDat['dec'] * u.degree)
         photDat['coord hms'] = coord.to_string('hmsdms',sep=' ')

@@ -158,4 +158,41 @@ class clusterClassification(object):
         
         if sType == 'All':
             t.write(self.synthPath,overwrite=True)
+
+def get_candidates(t,widerT=True,gCut=1.0):
+    """ 
+    Get the interesting near-solar candidates from a 
+    synthesized photometry + spectral classification table
+    
+    Parameters
+    ----------
+    t: Astropy Table
+        A table of synthesized photometry + spectral classification
+    widerT: bool
+        Look at a wider range of temperature classes?
+    gCut: float
+        A magnitude cut in the g band.
+        Eliminates all sources 1.0 magnitude brighter than the median
+    """
+    if widerT == True:
+        tClasses = ['G0','G1','G2','G3']
+    else:
+        tClasses = ['G1','G2','G3']
+    lClasses = ['IV','IV-V','V']
+    
+    TGood = np.zeros(len(t),dtype=np.bool)
+    LGood = np.zeros(len(t),dtype=np.bool)
+    
+    for oneTClass in tClasses:
+        goodP = (t['T Class'] == oneTClass)
+        TGood = TGood | goodP
+        
+    for oneLClass in lClasses:
+        goodP = (t['Lum Class'] == oneLClass)
+        LGood = LGood | goodP
+    
+    medMag = np.median(t['g'][LGood & TGood])
+    magCheck = t['g'] > (medMag - gCut)
+    
+    return t[LGood & TGood & magCheck]
     
