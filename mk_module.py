@@ -13,6 +13,28 @@ class clusterClassification(object):
         self.classData = ascii.read(mkOutFile,names=['SpFile','SpType','SpQuality','junk'])
         self.classData.sort('SpFile')
         self.src = src
+        self.split_Types()
+    
+    def split_Types(self):
+        tclass, lumclass, xtra, tletter = [], [], [], []
+        for oneType in self.classData['SpType']:
+            splitArr = oneType.split(" ")
+            numWords = len(splitArr)
+            tclass.append(splitArr[0])
+            tletter.append(splitArr[0][0])
+            if numWords >= 2:
+                lumclass.append(splitArr[1])
+            else:
+                lumclass.append('')
+            if numWords >= 3:
+                combExtra = r" ".join(splitArr[2:])
+                xtra.append(combExtra)
+            else:
+                xtra.append(r"")
+        self.classData['T Class'] = tclass
+        self.classData['T Letter'] = tletter
+        self.classData['Lum Class'] = lumclass
+        self.classData['Extra Class info'] = xtra
     
     def save_sorted(self):
         baseNamePrefix = os.path.splitext(os.path.basename(self.mkOutFile))[0]
