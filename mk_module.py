@@ -14,6 +14,9 @@ class clusterClassification(object):
         self.classData.sort('SpFile')
         self.src = src
         self.split_Types()
+        className = os.path.basename(mkOutFile)
+        ## The path to the synthesized photometry and classification
+        self.synthPath = 'output_synthesized/class_phot_synth_{}.csv'.format(className)
     
     def split_Types(self):
         tclass, lumclass, xtra, tletter = [], [], [], []
@@ -58,6 +61,14 @@ class clusterClassification(object):
         self.countTable['Counts'] = counts
         
         self.countTable.pprint(max_lines=-1)
+        
+    def get_phot_prev(self):
+        """ Get previously saved photometry
+        If file not found, it will generate one
+        """
+        if os.path.exists(self.synthPath) == False:
+            self.get_phot(sType='All')
+        self.photdat = ascii.read(self.synthPath)
     
     def get_phot(self,color='g-r',sType='G2 V',sCategory='SpType'):
         """ Gets the photometry of the stars of interest 
@@ -88,6 +99,8 @@ class clusterClassification(object):
             lookRows = self.classData[sCategory] == sType
         t = Table()
         names, colors, mags, spTypeList = [], [], [], []
+        TClassList, LClassList = [], []
+        TLetterlist, xtraClassList = [], []
         posRA, posDec = [], []
         
         kmag, kmag_e = [], []
@@ -124,14 +137,25 @@ class clusterClassification(object):
                 kmag_e.append(uPhot['K mag err'])
             
             spTypeList.append(oneRow['SpType'])
+            TClassList.append(oneRow['T Class'])
+            LClassList.append(oneRow['Lum Class'])
+            TLetterlist.append(oneRow['T Letter'])
+            xtraClassList.append(oneRow['Extra Class info'])
             
         t['Name'] = names
         t['Color (g-r)'] = colors
         t['g'] = mags
         t['SpType'] = spTypeList
+        t['T Class'] = TClassList
+        t['Lum Class'] = LClassList
+        t['T Letter'] = TLetterlist
+        t['Extra Class info'] = xtraClassList
         t['ra'] = posRA
         t['dec'] = posDec
         t['K mag'] = kmag
         t['K mag err'] = kmag_e
         self.photdat = t
+        
+        if sType == 'All':
+            t.write(self.synthPath,overwrite=True)
     

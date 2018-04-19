@@ -98,13 +98,21 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
         colorArr = ['red']
         sCategory = None
     
+    mkObj.get_phot_prev()
+    allPhotDat = mkObj.photdat
+    
     for oneType,dispCol in zip(typeExplore,colorArr):
-        mkObj.get_phot(sType=oneType,sCategory=sCategory)
+        #mkObj.get_phot(sType=oneType,sCategory=sCategory)
+        if sCategory is None:
+            photDat = allPhotDat
+        else:
+            pts = allPhotDat[sCategory] == oneType
+            photDat = allPhotDat[pts]
         if fov == True:
-            psObj.ax.plot(mkObj.photdat['ra'],mkObj.photdat['dec'],'o',color=dispCol,
+            psObj.ax.plot(photDat['ra'],photDat['dec'],'o',color=dispCol,
                           label=oneType)
         else:
-            psObj.ax.plot(mkObj.photdat['Color (g-r)'],mkObj.photdat['g'],'o',color=dispCol,
+            psObj.ax.plot(photDat['Color (g-r)'],photDat['g'],'o',color=dispCol,
                           label=oneType)
     if fov == False:
         psObj.ax.axvline(x=colorShow,linewidth=7.,alpha=0.3,color='red')
