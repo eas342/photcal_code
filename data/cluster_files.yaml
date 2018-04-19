@@ -2,13 +2,14 @@ NGC 2420:
    hectoData:
       - ../hectospec_data/2016.0207/reduction/0102/spHect-ngc2420_cat_1.2468-0102.fits
       - ../hectospec_data/2016.1009/reduction/0100/spHect-catalog_second_round_NGC2420_1.0447-0100.fits
-      - ../hectospec_data/2016.1125/reduction/0100/spHect-catalog_second_round_NGC2420_1.0767-0100.fits
+#      - ../hectospec_data/2016.1125/reduction/0100/spHect-catalog_second_round_NGC2420_1.0767-0100.fits
+# Difficult-to-use 270 gpm data
    panStarrsData:
       - ../pan_starrs/NGC2420.txt
    UKIRTData:
       - ../ukirt_data/merged_catalogs/NGC_2420_cat.fits
    mkClassification:
-      - ../classification/ngc2420_01_output_both.txt
+      - ../classification/ngc2420_03_output.txt
 NGC 2506:
    hectoData:
       - ../hectospec_data/2016.1126/reduction/0100/spHect-catalog_NGC2506_1.0820-0100.fits
@@ -17,7 +18,7 @@ NGC 2506:
    UKIRTData:
       - ../ukirt_data/merged_catalogs/NGC_2506_cat.fits
    mkClassification:
-      - ../classification/ngc2506_01_output.txt
+      - ../classification/ngc2506_02_output.txt
 NGC 6811:
    hectoData:
       - ../hectospec_data/2017.0529/reduction/0100/spHect-catalog_NGC6811_1.2024-0100.fits

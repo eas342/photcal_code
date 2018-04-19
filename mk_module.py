@@ -8,7 +8,7 @@ import os
 
 class clusterClassification(object):
     """ Designed to get the data from the mkclass output """
-    def __init__(self,mkOutFile='../classification/ngc2420_01_corrected_names.txt',src='NGC 2420'):
+    def __init__(self,mkOutFile='../classification/ngc2420_03_output.txt',src='NGC 2420'):
         self.mkOutFile = mkOutFile
         self.classData = ascii.read(mkOutFile,names=['SpFile','SpType','SpQuality','junk'])
         self.classData.sort('SpFile')
