@@ -43,7 +43,8 @@ def prep_all_spec():
     
 
 def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
-          figsize=None,photType='panStarrsData'):
+          figsize=None,photType='panStarrsData',
+          groupType='near G2 V'):
     """
     Does a color magnitude diagram
     
@@ -63,6 +64,13 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
           The figure size as (x,y). If None, it will use defaults.
     photType: str
           The type of photometry 
+    groupType: str
+          How to group the stars.
+          'All': show all stars w/ spectra
+          'near G2 V': near G2V in spectral type
+          'T Letter': F,G,K broadly
+          'T Class': G0, G2, G5
+          'Lum Class': V, IV-V, III, etc.
     """
     if mkOutFile is None:
         mkOutFile = getRedFile(src,dataType='mkClassification')
@@ -76,10 +84,22 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     colorShow = getClusterInfo(src,'g-r_solar')
     
     mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
-    typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G4 V','G5 V','G8 V']
-    colorArr = ['magenta','red','orange','green','olive','yellow','maroon']
+    
+    if groupType == 'near G2 V':
+        typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G4 V','G5 V','G8 V']
+        colorArr = ['magenta','red','orange','green','olive','yellow','maroon']
+        sCategory = 'SpType'
+    elif groupType in ['T Letter','T Class','Lum Class']:
+        typeExplore = np.unique(mkObj.classData[groupType])
+        colorArr = [None] * len(typeExplore)
+        sCategory = groupType
+    else:
+        typeExplore = ['All']
+        colorArr = ['red']
+        sCategory = None
+    
     for oneType,dispCol in zip(typeExplore,colorArr):
-        mkObj.get_phot(sType=oneType)
+        mkObj.get_phot(sType=oneType,sCategory=sCategory)
         if fov == True:
             psObj.ax.plot(mkObj.photdat['ra'],mkObj.photdat['dec'],'o',color=dispCol,
                           label=oneType)
@@ -96,10 +116,14 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
         psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf')
     else:
         custX=[-0.2,1.4]
-        custY=[23,14]
+        if src == 'NGC 6811':
+            custY=[19,10]
+        else:
+            custY=[23,14]
         psObj.ax.set_xlim(custX[0],custX[1])
         psObj.ax.set_ylim(custY[0],custY[1])
-        psObj.fig.savefig('plots/colormag'+srcCleanName+'.pdf')
+        groupName = r"_".join(groupType.split(r" "))
+        psObj.fig.savefig('plots/color_mag/colormag_{}_{}.pdf'.format(srcCleanName,groupName))
     if returnAx == True:
         return psObj.fig, psObj.ax
     #psObj.fig.show()
@@ -126,7 +150,7 @@ def cm_keck_proposal(src='NGC 2506'):
     p.fig.set_figwidth(5)
     p.fig.set_figheight(4)
     
-    p.fig.savefig('plots/colormag_selection_'+srcCleanName+'.pdf')
+    p.fig.savefig('plots/color_mag/colormag_selection_'+srcCleanName+'.pdf')
 
 def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
     """ Make a list of all near-G2V sources for all clusters"""
@@ -155,7 +179,7 @@ def azProposal_plots():
     fig, ax = do_cm(returnAx=True,figsize=(4,3.7))
     ax.set_xlim(0.1,0.9)
     ax.set_ylim(20,14)
-    fig.savefig('plots/colormag_proposal.pdf',bbox_inches='tight')
+    fig.savefig('plots/for_proposals/colormag_proposal.pdf',bbox_inches='tight')
 
 def do_fov():
     """

@@ -59,8 +59,18 @@ class clusterClassification(object):
         
         self.countTable.pprint(max_lines=-1)
     
-    def get_phot(self,color='g-r',sType='G2 V'):
-        """ Gets the photometry of the stars of interest """
+    def get_phot(self,color='g-r',sType='G2 V',sCategory='SpType'):
+        """ Gets the photometry of the stars of interest 
+        Parameters
+        -----------
+        color: str
+            The color to show (for example 'g-r')
+        sType: str
+            The spectral type to investigate. For example 'G2 V'
+        sCategory: str
+            The spectral category to search.
+            For example, set sCategory = 'T Letter'and sTyp = 'G'
+        """
         if self.src == 'NGC 2420':
             defaultIndices = [0,1]
         elif self.src == 'NGC 6811':
@@ -72,10 +82,10 @@ class clusterClassification(object):
         pS = ps.clusterPhot(src=self.src)
         uK = ps.clusterPhot(src=self.src,photType='UKIRTData')
         
-        if sType == None:
+        if (sType == None) | (sType == 'All'):
             lookRows = np.ones(len(self.classData),dtype=bool)
         else:
-            lookRows = self.classData['SpType'] == sType
+            lookRows = self.classData[sCategory] == sType
         t = Table()
         names, colors, mags, spTypeList = [], [], [], []
         posRA, posDec = [], []
