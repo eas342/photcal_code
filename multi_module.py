@@ -87,13 +87,20 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
     
     if groupType == 'near G2 V':
-        typeExplore = ['F9 V','G0 V','G2 IV-V','G2 V','G4 V','G5 V','G8 V']
-        colorArr = ['magenta','red','orange','green','olive','yellow','maroon']
-        sCategory = 'SpType'
+        ## a list of categories to group sources into
+        typeExplore = ['G0 IV to V','G1 IV to V','G2 IV to V','G3 IV to V']
+        ## The colors of the categories
+        colorArr = ['magenta','red','orange','green']
+        ## The column name for the parameter that will be grouped
+        sCategory = 'T Group'
     elif groupType in ['T Letter','T Class','Lum Class']:
         typeExplore = np.unique(mkObj.classData[groupType])
         colorArr = [None] * len(typeExplore)
         sCategory = groupType
+    elif groupType == 'Candidates':
+        typeExplore = ['Candidates']
+        colorArr = ['red']
+        sCategory = None
     else:
         typeExplore = ['All']
         colorArr = ['red']
@@ -102,7 +109,7 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     mkObj.get_phot_prev()
     allPhotDat = mkObj.photdat
     
-    if groupType == 'Candidates':
+    if (groupType == 'Candidates') | (groupType == 'near G2 V'):
         if src == 'NGC 2420':
             widerT=False
         else:
@@ -111,7 +118,6 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
         ## on NGC 2506 and NGC 6811 yet
         
         allPhotDat = mk.get_candidates(allPhotDat,widerT=widerT)
-        typeExplore = [groupType]
     
     for oneType,dispCol in zip(typeExplore,colorArr):
         #mkObj.get_phot(sType=oneType,sCategory=sCategory)
@@ -130,10 +136,11 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
         psObj.ax.axvline(x=colorShow,linewidth=7.,alpha=0.3,color='red')
         
     psObj.ax.legend(loc='best',frameon=True)
+    psObj.ax.set_title(src)
     
     srcCleanName = src.replace(r" ",r"_")
     if fov == True:
-        psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf')
+        psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf',bbox_inches='tight')
     else:
         custX=[-0.2,1.4]
         if src == 'NGC 6811':

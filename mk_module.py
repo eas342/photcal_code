@@ -172,7 +172,8 @@ def get_candidates(t,widerT=True,gCut=1.0):
         Look at a wider range of temperature classes?
     gCut: float
         A magnitude cut in the g band.
-        Eliminates all sources 1.0 magnitude brighter than the median
+        Eliminates all sources X magnitude brighter than the median
+        Default is 1.0
     """
     if widerT == True:
         tClasses = ['G0','G1','G2','G3']
@@ -193,6 +194,13 @@ def get_candidates(t,widerT=True,gCut=1.0):
     
     medMag = np.median(t['g'][LGood & TGood])
     magCheck = t['g'] > (medMag - gCut)
+    
+    t['T Group'] = np.zeros(len(t),dtype='S64')
+    
+    for oneTClass in tClasses:
+        tGroupPts = (t['T Class'] == oneTClass)
+        groupName = "{} {} to {}".format(oneTClass,lClasses[0],lClasses[-1])
+        t['T Group'][tGroupPts & LGood & magCheck] = groupName
     
     return t[LGood & TGood & magCheck]
     
