@@ -8,3 +8,5 @@ output_rectified/*/*.txt
 output_rectified/*/*/*.txt
 lists/*.csv
 output_synthesized/*.csv
+lists/gaia_coord/*.fits
+lists/gaia_coord/*.csv
