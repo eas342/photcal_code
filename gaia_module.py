@@ -51,7 +51,8 @@ def get_gaia():
 #     plt.ylabel()
 #     plt.show()
 
-def compare_ps(compareParameter='mag'):
+def compare_ps(compareParameter='mag',
+               groupParameter='ra'):
     """ 
     Compare Gaia DR2 and PS
     
@@ -61,6 +62,10 @@ def compare_ps(compareParameter='mag'):
         If 'mag', show the g - G magnitude difference
         If 'dist', show the offsets in coordinates between Pan-Starrs
         and Gaia DR2
+        If 'pm', show the proper motions
+    groupParameter: str
+        If 'dist', group the sources by Gaia-PS distance
+        If 'ra', group by RA
     """
     
     dat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
@@ -68,7 +73,13 @@ def compare_ps(compareParameter='mag'):
     diffRA = (dat['RA_ICRS'] - dat['RA_PS']) * 3600.
     diffDec = (dat['DE_ICRS'] - dat['DEC_PS']) * 3600.
     
-    closePt = np.sqrt(diffRA**2 + diffDec**2) < 0.12
+    if groupParameter == 'dist':
+        closePt = np.sqrt(diffRA**2 + diffDec**2) < 0.12
+    elif groupParameter == 'ra':
+        closePt = diffRA < 0.05
+    else:
+        print('Unrecognized grouping parameter')
+        closePt = np.isfinite(diffRA)
     
     color = dat['G_PS'] - dat['R_PS']
     deltaMag = dat['G_PS'] - dat['Gmag']
@@ -77,10 +88,14 @@ def compare_ps(compareParameter='mag'):
         x, y = color, deltaMag
         xLabel = 'g$_{PS}$ - r$_{PS}$'
         yLabel = 'g$_{PS}$ - G$_{Gaia}$'
-    else:
+    elif compareParameter == 'dist':
         x, y = diffRA, diffDec
         xLabel = '$\Delta$ RA (arcsec)'
         yLabel = '$\Delta$ Dec (arcsec)'
+    elif compareParameter == 'pm':
+        x, y = dat['pmRA'], dat['pmDE']
+        xLabel = 'Proper Motion RA (mas/yr)'
+        yLabel = 'Proper Motion Dec (mas/yr)'
     
     for ind, oneType in enumerate(['Close','Far']):
         if oneType == 'Close':
