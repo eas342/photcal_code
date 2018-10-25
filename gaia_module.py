@@ -37,22 +37,44 @@ def get_gaia():
     for oneColumn in dat.colnames:
         outDat["{}_PS".format(oneColumn)] = dat[oneColumn]
     
+    outDat['diffRA'] = (outDat['RA_ICRS'] - outDat['RA_PS']) * 3600.
+    outDat['diffDEC'] = (outDat['DE_ICRS'] - outDat['DEC_PS']) * 3600.
+    
     for oneFormat in ['fits','csv']:
         outDat.write('lists/gaia_coord/gaia_{}.{}'.format(basePrefix,oneFormat),
                 overwrite=True)
     
-# def show_offsets():
-#     """ Show the offsets between Pan-Starrs and Gaia DR2 """
-#     dat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
-#     diffRA = (dat['RA_ICRS'] - dat['RA_PS']) * 3600.
-#     diffDec = (dat['DE_ICRS'] - dat['DEC_PS']) * 3600.
-#     plt.plot(diffRA,diffDec,'.')
-#     plt.xlabel('')
-#     plt.ylabel()
-#     plt.show()
+
+def group_sources(dat,groupParameter='ra'):
+    """ 
+    Group the cluster size
+    
+    Parameters
+    -----------
+    groupParameter: str
+        If 'all', group by several criteria
+    """
+    if groupParameter == 'dist':
+        closePt = np.sqrt(dat['diffRA']**2 + dat['diffDEC']**2) < 0.12
+    elif groupParameter == 'ra':
+        closePt = dat['diffRA']  < 0.05
+    elif groupParameter == 'all':
+        closePt = np.ones(len(dat),dtype=np.bool)
+        for oneParam in ['pmRA','pmDE']:
+            med = np.median(dat[oneParam])
+            mad = np.median(np.abs(dat[oneParam] - med))
+            diff = np.abs(dat[oneParam] - med)
+            closePt = closePt & (diff < 5.0 * mad)
+        
+    else:
+        print('Unrecognized grouping parameter')
+        closePt = np.isfinite(diffRA)
+    
+    return closePt
+    
 
 def compare_ps(compareParameter='mag',
-               groupParameter='ra'):
+               groupParameter='all'):
     """ 
     Compare Gaia DR2 and PS
     
@@ -69,17 +91,9 @@ def compare_ps(compareParameter='mag',
     """
     
     dat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
+
     
-    diffRA = (dat['RA_ICRS'] - dat['RA_PS']) * 3600.
-    diffDec = (dat['DE_ICRS'] - dat['DEC_PS']) * 3600.
-    
-    if groupParameter == 'dist':
-        closePt = np.sqrt(diffRA**2 + diffDec**2) < 0.12
-    elif groupParameter == 'ra':
-        closePt = diffRA < 0.05
-    else:
-        print('Unrecognized grouping parameter')
-        closePt = np.isfinite(diffRA)
+    closePt = group_sources(dat,groupParameter=groupParameter)
     
     color = dat['G_PS'] - dat['R_PS']
     deltaMag = dat['G_PS'] - dat['Gmag']
@@ -89,7 +103,7 @@ def compare_ps(compareParameter='mag',
         xLabel = 'g$_{PS}$ - r$_{PS}$'
         yLabel = 'g$_{PS}$ - G$_{Gaia}$'
     elif compareParameter == 'dist':
-        x, y = diffRA, diffDec
+        x, y = dat['diffRA'], dat['diffDEC']
         xLabel = '$\Delta$ RA (arcsec)'
         yLabel = '$\Delta$ Dec (arcsec)'
     elif compareParameter == 'pm':
@@ -97,8 +111,8 @@ def compare_ps(compareParameter='mag',
         xLabel = 'Proper Motion RA (mas/yr)'
         yLabel = 'Proper Motion Dec (mas/yr)'
     
-    for ind, oneType in enumerate(['Close','Far']):
-        if oneType == 'Close':
+    for ind, oneType in enumerate(['Cluster','Excluded']):
+        if oneType == 'Cluster':
             pts = closePt
         else:
             pts = (closePt == False)
@@ -107,4 +121,7 @@ def compare_ps(compareParameter='mag',
     plt.legend()
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
+    
+def make_autoslit():
+    """ Make a file for autoslit """
     
