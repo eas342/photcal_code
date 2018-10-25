@@ -45,7 +45,7 @@ def get_gaia():
                 overwrite=True)
     
 
-def group_sources(dat,groupParameter='ra'):
+def group_sources(dat,groupParameter='all'):
     """ 
     Group the cluster size
     
@@ -124,4 +124,54 @@ def compare_ps(compareParameter='mag',
     
 def make_autoslit():
     """ Make a file for autoslit """
+    
+    ## read in the file
+    fullDat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
+    ## only include cluster points
+    clusterPt = group_sources(fullDat,groupParameter='all')
+    dat = fullDat[clusterPt]
+    
+    ## Read this from FILE if generalizing to other clusters
+    grSolarColor = 0.43
+    
+    t = Table()
+    
+    ## give them names from coordinates
+    coor = SkyCoord(dat['RA_ICRS'],dat['DE_ICRS'],unit=(u.deg,u.deg))
+    raString = coor.ra.to_string(u.hourangle,precision=0)
+    decString = coor.dec.to_string(u.deg,precision=0)
+    t['Name'] =  np.core.defchararray.add(raString,decString)
+    
+    ## Assign priority from color
+    t['Priority'] = 1000
+    grColor = dat['G_PS'] - dat['R_PS']
+    topPriority = np.abs(grColor - grSolarColor) < 0.02
+    t['Priority'][topPriority] = 5000
+    
+    ## Put in the Gaia coordinates
+    t['Coord Gaia'] = coor.to_string('hmsdms',sep=' ',precision=4)
+    
+    ## Put in the Gaia epoch
+    t['Epoch'] = 2015.5
+    
+    ## Put in the Gaia equinox
+    t['Equinox'] = 2000.0
+    
+    ## Put in proper motion, it takes arcsec/yr
+    t['pmRA'] = np.round(dat['pmRA'] / 1000.,4)
+    t['pmDE'] = np.round(dat['pmDE'] / 1000.,4)
+    #print(t)
+    
+    
+    ## Find the center of the points
+    coordCen = SkyCoord(np.mean(coor.ra),np.mean(coor.dec))
+    coordCenString = coordCen.to_string('hmsdms',sep=' ',precision=4)
+    
+    t.insert_row(0,vals=["CENTER",9999,coordCenString,2015.0,2000.0,0.0,0.0])
+    
+    t.write('lists/autoslit/ngc2506_solar_analogs.autoslit',
+            format="ascii.fixed_width_no_header",
+            delimiter=' ',overwrite=True)
+    
+    return t
     
