@@ -148,6 +148,9 @@ def make_autoslit():
     topPriority = np.abs(grColor - grSolarColor) < 0.02
     t['Priority'][topPriority] = 5000
     
+    ## Put in the Pan-Starrs G magnitudes
+    t['Mag'] = dat['G_PS']
+    
     ## Put in the Gaia coordinates
     t['Coord Gaia'] = coor.to_string('hmsdms',sep=' ',precision=4)
     
@@ -167,7 +170,7 @@ def make_autoslit():
     coordCen = SkyCoord(np.mean(coor.ra),np.mean(coor.dec))
     coordCenString = coordCen.to_string('hmsdms',sep=' ',precision=4)
     
-    t.insert_row(0,vals=["CENTER",9999,coordCenString,2015.0,2000.0,0.0,0.0])
+    t.insert_row(0,vals=["CENTER",9999,0.0,coordCenString,2015.0,2000.0,0.0,0.0])
     
     t.write('lists/autoslit/ngc2506_solar_analogs.autoslit',
             format="ascii.fixed_width_no_header",
