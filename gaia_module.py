@@ -144,7 +144,7 @@ def make_autoslit():
     ## get the alignment
     alignName = []
     for ind,oneRow in enumerate(alignDat):
-        alignName.append("Align-{}-g={:.2f}".format(ind+1,oneRow['G_PS']))
+        alignName.append("Align-{:02d}-g={:.2f}".format(ind+1,oneRow['G_PS']))
     
     ## Read this from FILE if generalizing to other clusters
     grSolarColor = 0.43
