@@ -15,6 +15,7 @@ import astropy.table
 from astropy.table import Table
 import matplotlib.pyplot as plt
 import numpy as np
+#import np.core.defchararray.add as stringadd
 
 #if LooseVersion(astropy.__version__) < LooseVersion("3.0"):
 #    logging.error("Need Astropy >=3.0 for this script. You'll also need Python >3")
@@ -141,8 +142,9 @@ def make_autoslit():
     ## Read in 6 alignment stars
     alignDat = Table.read('lists/gaia_coord/subset_1_alignment_stars.csv')
     ## get the alignment
-    nAlign = len(alignDat)
-    alignName = np.core.defchararray.add('Align',np.array(np.arange(nAlign)+1,dtype=np.str))
+    alignName = []
+    for ind,oneRow in enumerate(alignDat):
+        alignName.append("Align-{}-g={:.2f}".format(ind+1,oneRow['G_PS']))
     
     ## Read this from FILE if generalizing to other clusters
     grSolarColor = 0.43
@@ -150,11 +152,16 @@ def make_autoslit():
     t = Table()
     tAlign = Table()
     
-    ## give them names from coordinates
+    ## Formerly, give them names from coordinates
     coor = SkyCoord(dat['RA_ICRS'],dat['DE_ICRS'],unit=(u.deg,u.deg))
     raString = coor.ra.to_string(u.hourangle,precision=0)
     decString = coor.dec.to_string(u.deg,precision=0)
-    t['Name'] =  np.core.defchararray.add(raString,decString)
+    ## Shorter way to name them is from g-r color
+    gName, magString = [], []
+    for ind, oneRow in enumerate(dat):
+        gName.append("G-{:02d}-g-r={:.2f}".format(ind+1,oneRow['G_PS']-oneRow['R_PS']))
+        #magString.append("{:.3f}".format(oneRow['G_PS']))
+    t['Name'] =  gName
     tAlign['Name'] = alignName
     
     ## Assign priority from color
