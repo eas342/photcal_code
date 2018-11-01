@@ -11,6 +11,7 @@ from astropy.io import ascii, fits
 from distutils.version import LooseVersion
 import logging
 import pdb
+import astropy.table
 from astropy.table import Table
 import matplotlib.pyplot as plt
 import numpy as np
@@ -137,40 +138,58 @@ def make_autoslit():
     clusterPt = group_sources(fullDat,groupParameter='all')
     dat = fullDat[clusterPt]
     
+    ## Read in 6 alignment stars
+    alignDat = Table.read('lists/gaia_coord/subset_1_alignment_stars.csv')
+    ## get the alignment
+    nAlign = len(alignDat)
+    alignName = np.core.defchararray.add('Align',np.array(np.arange(nAlign)+1,dtype=np.str))
+    
     ## Read this from FILE if generalizing to other clusters
     grSolarColor = 0.43
     
     t = Table()
+    tAlign = Table()
     
     ## give them names from coordinates
     coor = SkyCoord(dat['RA_ICRS'],dat['DE_ICRS'],unit=(u.deg,u.deg))
     raString = coor.ra.to_string(u.hourangle,precision=0)
     decString = coor.dec.to_string(u.deg,precision=0)
     t['Name'] =  np.core.defchararray.add(raString,decString)
+    tAlign['Name'] = alignName
     
     ## Assign priority from color
     t['Priority'] = 1000
     grColor = dat['G_PS'] - dat['R_PS']
     topPriority = np.abs(grColor - grSolarColor) < 0.02
     t['Priority'][topPriority] = 5000
+    tAlign['Priority'] = -2
     
     ## Put in the Pan-Starrs G magnitudes
     t['Mag'] = dat['G_PS']
+    tAlign['Mag'] = alignDat['G_PS']
     
     ## Put in the Gaia coordinates
     t['Coord Gaia'] = coor.to_string('hmsdms',sep=' ',precision=4)
     
+    coorAlign = SkyCoord(alignDat['RA_ICRS'],alignDat['DE_ICRS'],unit=(u.deg,u.deg))
+    tAlign['Coord Gaia'] = coorAlign.to_string('hmsdms',sep=' ',precision=4)
+    
     ## Put in the Gaia epoch
     t['Epoch'] = 2015.5
+    tAlign['Epoch'] = 2015.5
     
     ## Put in the Gaia equinox
     t['Equinox'] = 2000.0
+    tAlign['Equinox'] = 2000.0
     
     ## Put in proper motion, it takes arcsec/yr
     t['pmRA'] = np.round(dat['pmRA'] / 1000.,4)
     t['pmDE'] = np.round(dat['pmDE'] / 1000.,4)
+    tAlign['pmRA'] = np.round(alignDat['pmRA'] / 1000.,4)
+    tAlign['pmDE'] = np.round(alignDat['pmDE'] / 1000.,4)
     #print(t)
     
+    t = astropy.table.vstack([tAlign,t])
     
     ## Find the center of the points
     coordCen = SkyCoord(np.mean(coor.ra),np.mean(coor.dec))
