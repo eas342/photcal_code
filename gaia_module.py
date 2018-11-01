@@ -19,10 +19,16 @@ import numpy as np
 #    logging.error("Need Astropy >=3.0 for this script. You'll also need Python >3")
 
 
-def get_gaia():
-    """ Gets the Gaia info for a table """
+def get_gaia(basePrefix="lris_targsNGC2506"):
+    """ Gets the Gaia info for a table 
+    Parameters
+    --------------
+    basePrefix: str
+        "lris_targsNGC2506" is the list of solar analog candidates
+        "lris_alignmentNGC2506" is the list of alignment stars
+    """
     
-    basePrefix = "lris_targsNGC2506"
+    
     fullDat = ascii.read('../pan_starrs/pro/output/{}.csv'.format(basePrefix))
     pts = fullDat['GROUP'] == 1
     dat = fullDat[pts]
