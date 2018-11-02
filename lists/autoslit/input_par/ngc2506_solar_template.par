@@ -1,0 +1,23 @@
+FILENAME  ngc2506_solar_analogs.autoslit
+FILEOUT  ngc2506_out.mask
+
+PRIORITY    0
+RANK_TOP    1
+RANK_BOT    1
+SLIT_WID    1
+SLIT_LEN    5
+SLIT_SEP    2.76
+
+EPOCH      2018.9
+TEMP       0
+PRESS      486
+WAVE       4400
+LAT        19.8259
+POS_ANGL   0.0
+HOUR_ANG   0
+
+ENG_TEST  N
+ADC       Y
+INTERACT  Y
+VERBOSE   N
+END

@@ -140,7 +140,9 @@ def make_autoslit():
     dat = fullDat[clusterPt]
     
     ## Read in 6 alignment stars
-    alignDat = Table.read('lists/gaia_coord/subset_1_alignment_stars.csv')
+    #alignDat = Table.read('lists/gaia_coord/subset_1_alignment_stars.csv')
+    alignDat = Table.read('lists/gaia_coord/gaia_lris_alignmentNGC2506.fits')
+    
     ## get the alignment
     alignName = []
     for ind,oneRow in enumerate(alignDat):
@@ -207,6 +209,19 @@ def make_autoslit():
     t.write('lists/autoslit/ngc2506_solar_analogs.autoslit',
             format="ascii.fixed_width_no_header",
             delimiter=' ',overwrite=True)
+    
+    ## Also make the parameter file
+    with open('lists/autoslit/input_par/ngc2506_solar_template.par') as templatePar:
+        outPar = templatePar.readlines()#.append(templatePar.readline())
+    
+    outPar.append("BOXES {}\n".format(len(tAlign)))
+    for oneBox in tAlign:
+        outPar.append(str(oneBox['Name'])+"\n")
+    outPar.append('END\n')
+    outPar.append('\n')
+    
+    with open('lists/autoslit/ngc2506_solar_analogs.par','w') as outParFile:
+        outParFile.writelines(outPar)
     
     return t
     
