@@ -130,11 +130,18 @@ def compare_ps(compareParameter='mag',
     plt.xlabel(xLabel)
     plt.ylabel(yLabel)
     
-def make_autoslit():
-    """ Make a file for autoslit """
+def make_autoslit(runRound=1):
+    """ Make a file for autoslit
+    
+    Parameters
+    ----------
+    runRound: int
+        Round to be run
+     """
     
     ## read in the file
     fullDat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
+    
     ## only include cluster points
     clusterPt = group_sources(fullDat,groupParameter='all')
     dat = fullDat[clusterPt]
@@ -198,6 +205,19 @@ def make_autoslit():
     tAlign['pmDE'] = np.round(alignDat['pmDE'] / 1000.,4)
     #print(t)
     
+    ## If second round, eliminate all sources already in mask
+    if runRound == 1:
+        roundText = ""
+    if runRound == 2:
+        maskColumns = ["X_STAR","Y_STAR","MIN_Y","MAX_Y","Percent","CCD_X","CCD_Y","Priority","Name","Mag"]
+        prevMask = ascii.read('lists/autoslit/ngc2506_out.mask',names=maskColumns,
+                             format='fixed_width_no_header',delimiter=' ')
+        
+        for oneRow in prevMask:
+            matches = (t["Name"] == oneRow['Name'])
+            t.remove_rows(matches)
+        roundText = "_round2"
+    
     t = astropy.table.vstack([tAlign,t])
     
     ## Find the center of the points
@@ -206,7 +226,9 @@ def make_autoslit():
     
     t.insert_row(0,vals=["CENTER",9999,0.0,coordCenString,2015.0,2000.0,0.0,0.0])
     
-    t.write('lists/autoslit/ngc2506_solar_analogs.autoslit',
+    slitName = "ngc2506_solar_analogs{}.autoslit".format(roundText)
+    
+    t.write('lists/autoslit/{}'.format(slitName),
             format="ascii.fixed_width_no_header",
             delimiter=' ',overwrite=True)
     
@@ -217,10 +239,13 @@ def make_autoslit():
     outPar.append("BOXES {}\n".format(len(tAlign)))
     for oneBox in tAlign:
         outPar.append(str(oneBox['Name'])+"\n")
+        
+    outPar[0] = "FILENAME  {}\n".format(slitName)
+    outPar[1] = "FILEOUT  ngc2506_out{}.mask\n".format(roundText)
     outPar.append('END\n')
     outPar.append('\n')
     
-    with open('lists/autoslit/ngc2506_solar_analogs.par','w') as outParFile:
+    with open('lists/autoslit/ngc2506_solar_analogs{}.par'.format(roundText),'w') as outParFile:
         outParFile.writelines(outPar)
     
     return t
