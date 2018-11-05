@@ -268,6 +268,15 @@ def make_autoslit(runRound=1):
     with open('lists/autoslit/input_par/ngc2506_solar_template.par') as templatePar:
         outPar = templatePar.readlines()#.append(templatePar.readline())
     
+    ## Modify some lines
+    for textInd, oneSetting in enumerate(outPar):
+        if "HOUR_ANG" in oneSetting:
+            
+            if runRound == 1: ## first PA
+                outPar[textInd] = "HOUR_ANG   -42.0\n"
+            elif runRound == 2:
+                outPar[textInd] = "HOUR_ANG   20.0\n"
+    
     outPar.append("BOXES {}\n".format(len(tAlign)))
     for oneBox in tAlign:
         outPar.append(str(oneBox['Name'])+"\n")

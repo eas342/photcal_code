@@ -14,7 +14,7 @@ PRESS      486
 WAVE       4400
 LAT        19.8259
 POS_ANGL   0.0
-HOUR_ANG   0
+HOUR_ANG   -42.0
 
 ENG_TEST  N
 ADC       Y
