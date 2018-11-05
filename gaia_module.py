@@ -15,24 +15,33 @@ import astropy.table
 from astropy.table import Table
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats
+
 #import np.core.defchararray.add as stringadd
 
 #if LooseVersion(astropy.__version__) < LooseVersion("3.0"):
 #    logging.error("Need Astropy >=3.0 for this script. You'll also need Python >3")
 
 
-def get_gaia(basePrefix="lris_targsNGC2506"):
+def get_gaia(basePrefix="lris_targsNGC2506",
+             groupInclude=[1]):
     """ Gets the Gaia info for a table 
     Parameters
     --------------
     basePrefix: str
         "lris_targsNGC2506" is the list of solar analog candidates
         "lris_alignmentNGC2506" is the list of alignment stars
+    groupInclude: list
+        List of integers describing the groups of stars to include
+        These are priority levels on stars with 1 the highest
     """
     
     
     fullDat = ascii.read('../pan_starrs/pro/output/{}.csv'.format(basePrefix))
-    pts = fullDat['GROUP'] == 1
+    pts = np.zeros(len(fullDat),dtype=np.bool)
+    for oneGroup in groupInclude:
+        pts = pts | (fullDat['GROUP'] == oneGroup)
+    
     dat = fullDat[pts]
     
     coor = SkyCoord(dat['RA'],dat['DEC'],unit=(u.deg,u.deg))
@@ -79,6 +88,27 @@ def group_sources(dat,groupParameter='all'):
         closePt = np.isfinite(diffRA)
     
     return closePt
+    
+
+def cluster_distance(basePrefix="full_targ_lists_NGC2506"):
+    """
+    Get the Gaia distance to the cluster from the main sequence stars
+    """
+    msDat = Table.read("lists/gaia_coord/gaia_{}.{}".format(basePrefix,"fits"))
+    goodp = msDat['e_Plx'] < 0.05
+    
+    medianPlx = np.nanmedian(msDat['Plx'][goodp])
+    errPlx = scipy.stats.sem(msDat['Plx'][goodp])
+    
+    print("Plx= {} +/- {}".format(medianPlx,errPlx))
+    dist = 1000./medianPlx
+    errDist = dist * errPlx/medianPlx
+    print("Dist= {} pc +/- {}".format(dist,errDist))
+    
+    distMod0 = 5. * np.log10(dist/10.)
+    errDistMod0 = 5. * errDist / (np.log(10.) * dist)
+    
+    print("Dist Mod = {} +/- {}".format(distMod0,errDistMod0))
     
 
 def compare_ps(compareParameter='mag',
