@@ -178,7 +178,9 @@ def make_autoslit(runRound=1):
     
     ## Read in 6 alignment stars
     #alignDat = Table.read('lists/gaia_coord/subset_1_alignment_stars.csv')
-    alignDat = Table.read('lists/gaia_coord/gaia_lris_alignmentNGC2506.fits')
+    alignDatFull = Table.read('lists/gaia_coord/gaia_lris_alignmentNGC2506.fits')
+    goodAlign = np.isfinite(alignDatFull['pmRA']) & np.isfinite(alignDatFull['pmDE'])
+    alignDat = alignDatFull[goodAlign]
     
     ## get the alignment
     alignName = []

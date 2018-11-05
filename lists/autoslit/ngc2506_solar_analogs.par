@@ -21,7 +21,7 @@ ADC       Y
 INTERACT  Y
 VERBOSE   N
 END
-BOXES 45
+BOXES 44
 Align-01-g=15.68
 Align-02-g=15.61
 Align-03-g=15.72
@@ -50,22 +50,21 @@ Align-25-g=15.58
 Align-26-g=15.52
 Align-27-g=15.67
 Align-28-g=15.85
-Align-29-g=15.89
-Align-30-g=16.57
-Align-31-g=16.60
-Align-32-g=16.68
-Align-33-g=16.81
-Align-34-g=17.12
-Align-35-g=17.18
-Align-36-g=17.27
-Align-37-g=16.61
-Align-38-g=16.22
-Align-39-g=16.07
-Align-40-g=16.43
-Align-41-g=17.00
-Align-42-g=17.24
-Align-43-g=17.29
-Align-44-g=16.45
-Align-45-g=17.48
+Align-29-g=16.57
+Align-30-g=16.60
+Align-31-g=16.68
+Align-32-g=16.81
+Align-33-g=17.12
+Align-34-g=17.18
+Align-35-g=17.27
+Align-36-g=16.61
+Align-37-g=16.22
+Align-38-g=16.07
+Align-39-g=16.43
+Align-40-g=17.00
+Align-41-g=17.24
+Align-42-g=17.29
+Align-43-g=16.45
+Align-44-g=17.48
 END
 
