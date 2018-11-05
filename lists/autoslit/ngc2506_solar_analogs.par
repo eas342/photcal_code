@@ -13,8 +13,8 @@ TEMP       0
 PRESS      486
 WAVE       4400
 LAT        19.8259
-POS_ANGL   0.0
-HOUR_ANG   -42.0
+POS_ANGL   -42.0
+HOUR_ANG   -1.8
 
 ENG_TEST  N
 ADC       Y

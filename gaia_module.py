@@ -270,12 +270,16 @@ def make_autoslit(runRound=1):
     
     ## Modify some lines
     for textInd, oneSetting in enumerate(outPar):
-        if "HOUR_ANG" in oneSetting:
-            
+        if "POS_ANGL" in oneSetting:
             if runRound == 1: ## first PA
-                outPar[textInd] = "HOUR_ANG   -42.0\n"
+                outPar[textInd] = "POS_ANGL   -42.0\n"
             elif runRound == 2:
-                outPar[textInd] = "HOUR_ANG   20.0\n"
+                outPar[textInd] = "POS_ANGL   20.0\n"
+        elif "HOUR_ANG" in oneSetting:
+            if runRound == 1: ## first PA
+                outPar[textInd] = "HOUR_ANG   -1.8\n"
+            elif runRound == 2:
+                outPar[textInd] = "HOUR_ANG   0.8\n"
     
     outPar.append("BOXES {}\n".format(len(tAlign)))
     for oneBox in tAlign:
