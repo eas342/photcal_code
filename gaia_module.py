@@ -256,7 +256,7 @@ def make_autoslit(runRound=1):
     coordCen = SkyCoord(np.mean(coor.ra),np.mean(coor.dec))
     coordCenString = coordCen.to_string('hmsdms',sep=' ',precision=4)
     
-    t.insert_row(0,vals=["CENTER",9999,0.0,coordCenString,2015.0,2000.0,0.0,0.0])
+    t.insert_row(0,vals=["CENTER",9999,0.0,coordCenString,2015.5,2000.0,0.0,0.0])
     
     slitName = "ngc2506_solar_analogs{}.autoslit".format(roundText)
     
@@ -274,7 +274,7 @@ def make_autoslit(runRound=1):
             if runRound == 1: ## first PA
                 outPar[textInd] = "POS_ANGL   -42.0\n"
             elif runRound == 2:
-                outPar[textInd] = "POS_ANGL   20.0\n"
+                outPar[textInd] = "POS_ANGL   10.0\n"
         elif "HOUR_ANG" in oneSetting:
             if runRound == 1: ## first PA
                 outPar[textInd] = "HOUR_ANG   -1.8\n"
