@@ -284,9 +284,13 @@ def make_autoslit(runRound=1):
     outPar.append("BOXES {}\n".format(len(tAlign)))
     for oneBox in tAlign:
         outPar.append(str(oneBox['Name'])+"\n")
-        
+    
     outPar[0] = "FILENAME  {}\n".format(slitName)
-    outPar[1] = "FILEOUT  ngc2506_out{}.mask\n".format(roundText)
+    if runRound == 1:
+        outPar[1] = "FILEOUT  ngc2506_out{}.mask\n".format(roundText)
+    elif runRound == 2:
+        outPar[1] = "FILEOUT  ngc2506r2_out.mask\n".format(roundText)
+    
     outPar.append('END\n')
     outPar.append('\n')
     
