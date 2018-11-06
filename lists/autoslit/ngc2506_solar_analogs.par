@@ -21,15 +21,13 @@ ADC       Y
 INTERACT  Y
 VERBOSE   N
 END
-BOXES 9
+BOXES 7
 Align-06-g=15.76
 Align-13-g=16.07
-Align-19-g=16.30
 Align-27-g=16.78
 Align-45-g=17.08
 Align-65-g=15.67
 Align-76-g=16.75
-Align-87-g=17.19
 Align-104-g=16.13
 END
 
