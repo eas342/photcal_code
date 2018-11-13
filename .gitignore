@@ -11,3 +11,5 @@ lists/*.csv
 output_synthesized/*.csv
 lists/gaia_coord/*.fits
 lists/gaia_coord/*.csv
+lists/autoslit/candidate_info/*.fits
+lists/autoslit/candidate_info/*.csv

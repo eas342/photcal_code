@@ -213,3 +213,32 @@ def do_fov():
     """
     do_cm(fov=True)
     
+def autoslit_ukirt():
+    """
+    Find the UKIRT magnitudes of the stars selected for autoslit
+    
+    """
+    dat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
+    photDat =  ps.clusterPhot(src="NGC 2506",photType="UKIRTData")
+    Jmag, Hmag, Kmag = [], [], []
+    JmagErr, HmagErr, KmagErr = [], [], []
+    for oneRow in dat:
+        thisPhot = photDat.lookup_src(oneRow["RA_ICRS"],oneRow["DE_ICRS"])
+        if thisPhot is None:
+            Jmag.append(np.nan) ; JmagErr.append(np.nan)
+            Hmag.append(np.nan) ; HmagErr.append(np.nan)
+            Kmag.append(np.nan) ; KmagErr.append(np.nan)
+        else:
+            Jmag.append(thisPhot["J mag"]) ; JmagErr.append(thisPhot["J mag err"])
+            Hmag.append(thisPhot["H mag"]) ; HmagErr.append(thisPhot["H mag err"])
+            Kmag.append(thisPhot["K mag"]) ; KmagErr.append(thisPhot["K mag err"])
+    
+    dat['J mag'] = Jmag ; dat['J mag err'] = JmagErr
+    dat['H mag'] = Hmag ; dat['H mag err'] = HmagErr
+    dat['K mag'] = Kmag ; dat['K mag err'] = KmagErr
+    dat['J - K mag'] = dat['J mag'] - dat['K mag']
+    
+    autoslitInfoBasename = 'lists/autoslit/candidate_info/ngc2506_autoslit'
+    dat.write(autoslitInfoBasename+'.fits',overwrite=True)
+    dat.write(autoslitInfoBasename+'.csv',overwrite=True)
+    
