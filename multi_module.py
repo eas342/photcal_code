@@ -11,6 +11,7 @@ import pandas as pd
 import yaml
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import matplotlib.pyplot as plt
 
 def make_cluster_csv():
     """ Makes a CSV from the cluster file """
@@ -215,7 +216,7 @@ def do_fov():
     
 def autoslit_ukirt():
     """
-    Find the UKIRT magnitudes of the stars selected for autoslit
+    Find the UKIRT magnitudes of the LRIS slit mask stars put into autoslit
     
     """
     dat = Table.read('lists/gaia_coord/gaia_lris_targsNGC2506.fits')
@@ -241,4 +242,46 @@ def autoslit_ukirt():
     autoslitInfoBasename = 'lists/autoslit/candidate_info/ngc2506_autoslit'
     dat.write(autoslitInfoBasename+'.fits',overwrite=True)
     dat.write(autoslitInfoBasename+'.csv',overwrite=True)
+    
+def cm_autoslit(color='J - K'):
+    """
+    Plot the color magnitude of the LRIS slit mask stars put into autoslit
+    
+    Parameters
+    -------------
+    color: str
+        Specify which color to plot. E.g. "J - K" or "g - r"
+    
+    """
+    autoDat = Table.read("lists/autoslit/candidate_info/ngc2506_autoslit.fits")
+    if color == 'J - K':
+        photColor = autoDat['J - K mag']
+        colorName = 'J - K'
+        ## using Christopher Willmer's Abs Mag of the sun page
+        solarColor = 5.03 - 4.64
+    elif color == 'J - H':
+        photColor = autoDat['J mag'] - autoDat['H mag']
+        colorName = 'J - H'
+        ## using Christopher Willmer's Abs Mag of the sun page
+        solarColor = 0.32
+    elif color == 'g - r':
+        photColor = autoDat['G_M_R_PS']
+        colorName = 'g - r'
+        ## using my notebook with extinction
+        solarColor = 0.43
+    else:
+        print("Unrecognized color")
+        return
+    
+    mag = autoDat['K mag']
+    magName = 'K'
+    
+    fig, ax = plt.subplots()
+    ax.plot(photColor,mag,'.')
+    ax.invert_yaxis()
+    
+    ax.axvline(solarColor)
+    ax.set_xlabel(colorName)
+    ax.set_ylabel(magName)
+    fig.show()
     
