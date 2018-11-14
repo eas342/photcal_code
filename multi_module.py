@@ -64,7 +64,7 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     figsize: tuple
           The figure size as (x,y). If None, it will use defaults.
     photType: str
-          The type of photometry 
+          The type of photometry (e.g. "panStarrsData" vs "UKIRTData")
     groupType: str
           How to group the stars.
           'All': show all stars w/ spectra
@@ -77,13 +77,19 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     if mkOutFile is None:
         mkOutFile = getRedFile(src,dataType='mkClassification')
     
-    psObj = ps.clusterPhot(src=src)
+    
+    psObj = ps.clusterPhot(src=src,photType=photType)
     if fov == True:
         psObj.plot_fov()
     else:
-        psObj.plot_cm(figsize=figsize)
-    
-    colorShow = getClusterInfo(src,'g-r_solar')
+        if photType == 'panStarrsData':
+            color1='g'; color2='r' ; mag='g'
+        else:
+            color1='J mag' ; color2='K mag' ; mag='K mag'
+        
+        psObj.plot_cm(figsize=figsize,
+                      color1=color1,color2=color2,mag=mag)
+        colorShow = getClusterInfo(src,'g-r_solar')
     
     mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
     
@@ -283,5 +289,5 @@ def cm_autoslit(color='J - K'):
     ax.axvline(solarColor)
     ax.set_xlabel(colorName)
     ax.set_ylabel(magName)
-    fig.show()
+    fig.savefig('plots/autoslit/{}.pdf'.format(color.replace(" ","_")))
     
