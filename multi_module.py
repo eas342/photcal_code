@@ -84,12 +84,16 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     else:
         if photType == 'panStarrsData':
             color1='g'; color2='r' ; mag='g'
+            solarColor = 'g-r_solar'
         else:
-            color1='J mag' ; color2='K mag' ; mag='K mag'
+            color1='J mag' ; color2='H mag' ; mag='J mag'
+            solarColor = 'J-H_solar'
+        
+        plotName = "{}-{}".format(color1.replace(" ","_"),color2.replace(" ","_"))
         
         psObj.plot_cm(figsize=figsize,
                       color1=color1,color2=color2,mag=mag)
-        colorShow = getClusterInfo(src,'g-r_solar')
+        colorShow = getClusterInfo(src,solarColor)
     
     mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
     
@@ -137,7 +141,14 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
             psObj.ax.plot(photDat['ra'],photDat['dec'],'o',color=dispCol,
                           label=oneType)
         else:
-            psObj.ax.plot(photDat['Color (g-r)'],photDat['g'],'o',color=dispCol,
+            if photType == 'panStarrsData':
+                xShow = photDat['Color (g-r)']
+                yShow = photDat['g']
+            else:
+                xShow = photDat['J mag'] - photDat['H mag']
+                yShow = photDat['J mag']
+            
+            psObj.ax.plot(xShow,yShow,'o',color=dispCol,
                           label=oneType)
     if fov == False:
         psObj.ax.axvline(x=colorShow,linewidth=7.,alpha=0.3,color='red')
@@ -149,15 +160,19 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     if fov == True:
         psObj.fig.savefig('plots/fov'+srcCleanName+'.pdf',bbox_inches='tight')
     else:
-        custX=[-0.2,1.4]
-        if src == 'NGC 6811':
-            custY=[19,10]
+        if photType == 'panStarrsData':
+            custX=[-0.2,1.4]
+            if src == 'NGC 6811':
+                custY=[19,10]
+            else:
+                custY=[23,14]
         else:
-            custY=[23,14]
+            custX = [0.1,0.8]
+            custY = [19,11]
         psObj.ax.set_xlim(custX[0],custX[1])
         psObj.ax.set_ylim(custY[0],custY[1])
         groupName = r"_".join(groupType.split(r" "))
-        psObj.fig.savefig('plots/color_mag/colormag_{}_{}.pdf'.format(srcCleanName,groupName))
+        psObj.fig.savefig('plots/color_mag/colormag_{}_{}_{}.pdf'.format(srcCleanName,groupName,plotName))
     if returnAx == True:
         return psObj.fig, psObj.ax
     #psObj.fig.show()
