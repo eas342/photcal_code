@@ -104,6 +104,7 @@ class clusterClassification(object):
         posRA, posDec = [], []
         
         kmag, kmag_e = [], []
+        jmag, hmag = [], []
         
         for oneRow in self.classData[lookRows]:
             baseName = os.path.basename(oneRow['SpFile'])
@@ -132,9 +133,13 @@ class clusterClassification(object):
             if uPhot is None:
                 kmag.append(np.nan)
                 kmag_e.append(np.nan)
+                jmag.append(np.nan)
+                hmag.append(np.nan)
             else:
                 kmag.append(uPhot['K mag'])
                 kmag_e.append(uPhot['K mag err'])
+                jmag.append(uPhot['J mag'])
+                hmag.append(uPhot['H mag'])
             
             spTypeList.append(oneRow['SpType'])
             TClassList.append(oneRow['T Class'])
@@ -154,6 +159,9 @@ class clusterClassification(object):
         t['dec'] = posDec
         t['K mag'] = kmag
         t['K mag err'] = kmag_e
+        t['J mag'] = jmag
+        t['H mag'] = hmag
+        
         self.photdat = t
         
         if sType == 'All':
