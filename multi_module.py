@@ -263,7 +263,78 @@ def autoslit_ukirt():
     autoslitInfoBasename = 'lists/autoslit/candidate_info/ngc2506_autoslit'
     dat.write(autoslitInfoBasename+'.fits',overwrite=True)
     dat.write(autoslitInfoBasename+'.csv',overwrite=True)
+
+def make_coorFile():
+    """ Makes a coordinate file for Rafia's Spitzer Pipeline
+    """
+    exampleCoorFile = '../spitzer/ngc2420_all_AOR_phot/ngc2420_example_skyCrd.csv'
+    exCoorDat = ascii.read(exampleCoorFile)
+    filePaths = np.unique(exCoorDat['AOR Filepath'])
     
+    gDat = ascii.read("lists/g_starsNGC 2420.csv")
+    coorDat = Table()
+    
+    paths, coors = [], []
+    for oneFile in filePaths:
+        for oneTarg in gDat:
+            paths.append(oneFile)
+            coorString = "{} {}".format(oneTarg['ra'],oneTarg['dec'])
+            coors.append(coorString)
+    coorDat['AOR Filepath'] = paths
+    coorDat['Target Coordinates'] = coors
+    
+    print(coorDat)
+    coorDat.write('lists/irac_coorFiles/ngc2420_sky2.csv')
+    
+
+def ukirtSpitzer():
+    """
+    Compare the Spitzer and IRAC photometry
+    This is a check to see if the output from Rafia's pipeline looks reasonable
+    """
+    ## G star data with UKIRT and Pan Starrs info
+    gDat = ascii.read("lists/g_starsNGC 2420.csv")
+    coorG = SkyCoord(gDat['ra'],gDat['dec'],unit=(u.deg,u.deg))
+    
+    ## IRAC data
+    iDat = ascii.read('../spitzer/ngc2420_all_AOR_phot/ngc2420_final_aor_data.csv')
+    coorI = SkyCoord(iDat['Target RA'],iDat['Target Dec'],unit=(u.deg,u.deg))
+    
+    band = 'IRAC1'
+    
+    ## Get zero point and error
+    if band == 'IRAC1':
+        ## From here on 2019-01-23
+        ## https://irsa.ipac.caltech.edu/data/SPITZER/docs/irac/iracinstrumenthandbook/17/
+        zeroPoint = 280.9e3 ## mJy
+        zeroErr = 4.1e3 ## mJy
+    else:
+        print("Unrecognized band!")
+        return
+    
+    magZErr = zeroErr/zeroPoint * 2.5 / np.log(10.)
+    
+    iracMags, iracErrs = [], []
+    for indSrc, src in enumerate(gDat):
+        indI = ((coorG[indSrc].separation(coorI) < 0.5 * u.arcsec) & 
+                (iDat['FTime (sec)'] > 5.) & 
+                (np.isfinite(iDat['Flux (mJy)'])))
+        medFlux = np.median(iDat[indI]['Flux (mJy)'])
+        standErr = np.median(iDat[indI]['Error (mJy)']) / np.sum(indI)
+        
+        medMag = -2.5 * np.log10(medFlux/zeroPoint)
+        medMagErr = standErr / medFlux * 2.5  / np.log(10.)
+        totErr = np.sqrt(medMagErr**2 + magZErr**2)
+        
+        iracMags.append(medMag)
+        iracErrs.append(totErr)
+    
+    gDat[band+ ' mag'] = iracMags
+    gDat[band+' err'] = iracErrs
+    
+    return gDat
+    
+
 def cm_autoslit(color='J - K'):
     """
     Plot the color magnitude of the LRIS slit mask stars put into autoslit
