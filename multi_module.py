@@ -1,5 +1,5 @@
 from astropy.io import ascii
-from astropy.table import Table, vstack
+from astropy.table import Table, vstack, hstack
 from astropy.io import ascii
 import numpy as np
 import hecto_module as hm
@@ -297,7 +297,8 @@ def ukirtSpitzer():
     coorG = SkyCoord(gDat['ra'],gDat['dec'],unit=(u.deg,u.deg))
     
     ## IRAC data
-    iDat = ascii.read('../spitzer/ngc2420_all_AOR_phot/ngc2420_final_aor_data.csv')
+    #iDat = ascii.read('../spitzer/ngc2420_all_AOR_phot/ngc2420_final_aor_data.csv')
+    iDat = ascii.read('../spitzer/ngc2420_all_AOR_phot/ngc2420_coor2_aor_data.csv')
     coorI = SkyCoord(iDat['Target RA'],iDat['Target Dec'],unit=(u.deg,u.deg))
     
     band = 'IRAC1'
@@ -315,6 +316,8 @@ def ukirtSpitzer():
     magZErr = zeroErr/zeroPoint * 2.5 / np.log(10.)
     
     iracMags, iracErrs = [], []
+    iracFlux, iracFluxErr = [], []
+    
     for indSrc, src in enumerate(gDat):
         indI = ((coorG[indSrc].separation(coorI) < 0.5 * u.arcsec) & 
                 (iDat['FTime (sec)'] > 5.) & 
@@ -328,9 +331,25 @@ def ukirtSpitzer():
         
         iracMags.append(medMag)
         iracErrs.append(totErr)
+        iracFlux.append(medFlux)
+        iracFluxErr.append(standErr)
     
     gDat[band+ ' mag'] = iracMags
     gDat[band+' err'] = iracErrs
+    gDat[band+' Flux (mJy)'] = iracFlux
+    gDat[band+' Flux Err (mJy)'] = iracFluxErr
+    
+    ## Also throw in Pan Starrs Data
+    photDat = ps.clusterPhot(src="NGC 2420",photType="panStarrsData")
+    
+    for ind, oneRow in enumerate(gDat):
+        thisPhot = photDat.lookup_src(oneRow['ra'],oneRow['dec'])
+        if ind == 0:
+            allPSphot = thisPhot
+        else:
+            allPSphot = vstack([allPSphot,thisPhot])
+    
+    gDat = hstack([gDat,allPSphot[['dg','r','dr','i','di','z','dz']]])
     
     return gDat
     
