@@ -1,5 +1,5 @@
 # slitmask with specified rotator position
-wR1n2506      1 08 00 02.04 -10 46 13.93 2000.0 rotdest=10.0 rotmode=pa
-wR2n2506      1 08 00 02.04 -10 46 21.93 2000.0 rotdest=-42.0 rotmode=pa
-nR1n2506      1 08 00 02.04 -10 46 13.93 2000.0 rotdest=10.0 rotmode=pa
-nR2n2506      1 08 00 02.04 -10 46 21.93 2000.0 rotdest=-42.0 rotmode=pa
+wR2n2506      1 08 00 02.04 -10 46 13.93 2000.0 rotdest=10.0 rotmode=pa
+wR1n2506      1 08 00 02.04 -10 46 21.93 2000.0 rotdest=-42.0 rotmode=pa
+nR2n2506      1 08 00 02.04 -10 46 13.93 2000.0 rotdest=10.0 rotmode=pa
+nR1n2506      1 08 00 02.04 -10 46 21.93 2000.0 rotdest=-42.0 rotmode=pa
