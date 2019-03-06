@@ -264,6 +264,31 @@ def autoslit_ukirt():
     dat.write(autoslitInfoBasename+'.fits',overwrite=True)
     dat.write(autoslitInfoBasename+'.csv',overwrite=True)
 
+def quick_crude_ngc2506():
+    """
+    Quick crude look at the first set of stars from Keck LRIS
+    """
+    dat = ascii.read('lists/g_star_subset_ngc2506.csv')
+    phot = ps.clusterPhot(src='NGC 2506',photType='UKIRTData')
+    jmag, hmag, kmag = [], [], []
+    for oneCoord in dat:
+        coord = SkyCoord(oneCoord['RA'],oneCoord['Dec'],unit=(u.hourangle,u.deg))
+        UKIRTphot = phot.lookup_src(ra=coord.ra.deg,dec=coord.dec.deg)
+        if UKIRTphot == None:
+            jmag.append('nan')
+            hmag.append('nan')
+            kmag.append('nan')
+        else:
+            jmag.append(UKIRTphot['J mag'])
+            hmag.append(UKIRTphot['H mag'])
+            kmag.append(UKIRTphot['K mag'])
+    dat['J mag'] = jmag
+    dat['H mag'] = hmag
+    dat['K mag'] = kmag
+    
+    dat.write('lists/g_star_subset_ngc2506_ukirt.csv')
+    
+
 def make_coorFile():
     """ Makes a coordinate file for Rafia's Spitzer Pipeline
     """
