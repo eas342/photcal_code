@@ -13,3 +13,10 @@ lists/gaia_coord/*.fits
 lists/gaia_coord/*.csv
 lists/autoslit/candidate_info/*.fits
 lists/autoslit/candidate_info/*.csv
+lists/old_lris_ngc2506_stuff/
+lists/preliminary_ngc2506_solar_analogs/images
+lists/preliminary_ngc2506_solar_analogs/apt*
+lists/preliminary_ngc2506_solar_analogs/aladin
+lists/preliminary_ngc2506_solar_analogs/lists_and_regions/*.reg
+lists/preliminary_ngc2506_solar_analogs/lists_and_regions/coordinates_in_hms_dms_form.txt
+
