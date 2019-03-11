@@ -286,7 +286,7 @@ def quick_crude_ngc2506():
     dat['H mag'] = hmag
     dat['K mag'] = kmag
     
-    dat.write('lists/g_star_subset_ngc2506_ukirt.csv')
+    dat.write('lists/g_star_subset_ngc2506_ukirt.csv',overwrite=True)
     
 
 def make_coorFile():
