@@ -264,13 +264,15 @@ def autoslit_ukirt():
     dat.write(autoslitInfoBasename+'.fits',overwrite=True)
     dat.write(autoslitInfoBasename+'.csv',overwrite=True)
 
-def quick_crude_ngc2506():
+def quick_photometry_ngc2506(specTypes=''):
     """
-    Quick crude look at the first set of stars from Keck LRIS
+    Quick crude look at the stars from Keck LRIS
     """
-    dat = ascii.read('lists/g_star_subset_ngc2506.csv')
+    filePath = 'lists/sptype_002_solar_analogs/lists/early_lists/g_star_subset_ngc2506.csv'
+    dat = ascii.read(filePath)
     phot = ps.clusterPhot(src='NGC 2506',photType='UKIRTData')
     jmag, hmag, kmag = [], [], []
+    raDeg, decDeg = [], []
     for oneCoord in dat:
         coord = SkyCoord(oneCoord['RA'],oneCoord['Dec'],unit=(u.hourangle,u.deg))
         UKIRTphot = phot.lookup_src(ra=coord.ra.deg,dec=coord.dec.deg)
@@ -282,11 +284,18 @@ def quick_crude_ngc2506():
             jmag.append(UKIRTphot['J mag'])
             hmag.append(UKIRTphot['H mag'])
             kmag.append(UKIRTphot['K mag'])
+        raDeg.append(coord.ra.deg)
+        decDeg.append(coord.dec.deg)
+    
     dat['J mag'] = jmag
     dat['H mag'] = hmag
     dat['K mag'] = kmag
     
-    dat.write('lists/g_star_subset_ngc2506_ukirt.csv',overwrite=True)
+    dat['RA (deg)'] = raDeg
+    dat['Dec (deg)'] = decDeg
+    
+    outName = 'lists/sptype_002_solar_analogs/lists/g_star_subset_ngc2506_ukirt.csv'
+    dat.write(outName,overwrite=True)
     
 
 def make_coorFile():
