@@ -388,6 +388,25 @@ def ukirtSpitzer():
     return gDat
     
 
+def example_gaia_source_aptx_file():
+    """
+    Look at the color magnitude diagram for the example source
+    """
+    cPhot = ps.clusterPhot(src='NGC 2506',photType='UKIRTData')
+    
+    coord = SkyCoord('07 59 58.5995 -10 46 46.93',unit=(u.hourangle,u.deg))
+    
+    g1 = cPhot.lookup_src(ra=coord.ra.deg,dec=coord.dec.deg)
+    
+    cPhot.plot_cm(color1='J mag',color2='K mag',mag='J mag')
+    cPhot.ax.plot(g1['J mag'] - g1['K mag'],g1['J mag'],'o',markersize=16,color='red')
+    cPhot.ax.text(g1['J mag'] - g1['K mag'],g1['J mag'],'GAIA DR2 3038044777529190144',color='red')
+    
+    cPhot.ax.set_xlim(0.15,0.9)
+    cPhot.ax.set_ylim(18,12)
+    cPhot.fig.savefig('plots/specific_plots/gaia_dr_3038044777529190144.png')
+    plt.close(cPhot.fig)
+
 def cm_autoslit(color='J - K'):
     """
     Plot the color magnitude of the LRIS slit mask stars put into autoslit
