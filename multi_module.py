@@ -20,7 +20,7 @@ def make_cluster_csv():
 
 def getRedFile(src,index=0,dataType='hectoData'):
     """ Finds the reduced file from the name and index """
-    clusterF = yaml.load(open('data/cluster_files.yaml'))
+    clusterF = yaml.safe_load(open('data/cluster_files.yaml'))
     return clusterF[src][dataType][index]
 
 def getClusterInfo(src,cProperty):
@@ -33,7 +33,7 @@ def getClusterInfo(src,cProperty):
 
 def prep_all_spec():
     """ Prepares all Hectospec spectra for mkClass"""
-    clustFiles = yaml.load(open('data/cluster_files.yaml'))
+    clustFiles = yaml.safe_load(open('data/cluster_files.yaml'))
     cDat = ascii.read('data/cluster_data.csv')
     for cInd, oneClust in enumerate(clustFiles.keys()):
         nFiles = len(clustFiles[oneClust]['hectoData'])
@@ -203,7 +203,7 @@ def cm_keck_proposal(src='NGC 2506'):
 
 def make_g2v_lists(sTypes=['G0 V','G2 V','G5 V']):
     """ Make a list of all near-G2V sources for all clusters"""
-    clustFiles = yaml.load(open('data/cluster_files.yaml'))
+    clustFiles = yaml.safe_load(open('data/cluster_files.yaml'))
     for oneClust in clustFiles.keys():
         mkOutFile = clustFiles[oneClust]['mkClassification']
         mkObj = mk.clusterClassification(mkOutFile=mkOutFile[0],src=oneClust)
