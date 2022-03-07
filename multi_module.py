@@ -5,6 +5,7 @@ import numpy as np
 import hecto_module as hm
 import phot_module as ps
 import mk_module as mk
+import twomass_module as tm
 import pdb
 import os
 import pandas as pd
@@ -448,4 +449,11 @@ def cm_autoslit(color='J - K'):
     ax.set_xlabel(colorName)
     ax.set_ylabel(magName)
     fig.savefig('plots/autoslit/{}.pdf'.format(color.replace(" ","_")))
+
+def compare_ukirt_2mass(src='NGC 2506'):
+    """
+    Compare UKIRT and 2MASS
+    """
+    cPhot  = ps.clusterPhot(src=src,photType='UKIRTData')
+    tm_res = tm.get_2mass_cat(cPhot.dat)
     
