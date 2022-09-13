@@ -456,4 +456,5 @@ def compare_ukirt_2mass(src='NGC 2506'):
     """
     cPhot  = ps.clusterPhot(src=src,photType='UKIRTData')
     tm_res = tm.get_2mass_cat(cPhot.dat)
+    tm.plot_twomass_ukirt(tm_res,src=src)
     

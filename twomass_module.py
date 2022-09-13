@@ -60,33 +60,51 @@ def get_2mass_cat(tab):
     sep_constraint = d2d < max_sep
     bad_sep = d2d > max_sep
     
-
-    
-    fig, axArr = plt.subplots(3,2,figsize=(10,10))#,sharey=True)
-    
-    #axArr[0].plot(tab['J mag'],diff,'.')
     for bandInd,oneBand in enumerate(['J','H','K']):
         
         tab['{}mag_2mass'.format(oneBand)] = tm_res['{}mag'.format(oneBand)][idx]
         tab['{}mag_2mass'.format(oneBand)][bad_sep] = np.nan
+        
+    return tab
+
+
+def plot_twomass_ukirt(tab,src='NGC 2506'):
+    fig, axArr = plt.subplots(3,2,figsize=(10,10))#,sharey=True)
+    
+    #axArr[0].plot(tab['J mag'],diff,'.')
+    for bandInd,oneBand in enumerate(['J','H','K']):
     
         diff = tab['{} mag'.format(oneBand)] - tab['{}mag_2mass'.format(oneBand)]
-    
-        plot_density_scatter(axArr[bandInd,0],tab['{} mag'.format(oneBand)],diff)
+        
+        goodpt_diff = np.abs(diff) < 0.4 ## exlude outliers and bright points
+        #goodpt_brightness = tab['K mag'] > 12.
+        goodpt_brightness = (tab['K mag'] > 11.5) & (tab['K mag'] < 14.5)
+        goodpt = goodpt_diff & goodpt_brightness
+        medianOffset = np.nanmedian(diff[goodpt])
+        print("Median UKIRT {} - 2MASS {} = {}".format(oneBand,oneBand,medianOffset))
+        print("from  {} points".format(np.sum(goodpt)))
+        axArr[bandInd,0].axhline(medianOffset,color='green',linestyle='dashed')
+        axArr[bandInd,1].axhline(medianOffset,color='green',linestyle='dashed')
+        
+        densDat = plot_density_scatter(axArr[bandInd,0],tab['{} mag'.format(oneBand)],diff)
         axArr[bandInd,0].set_ylim(-0.2,0.2)
         axArr[bandInd,0].set_ylabel(r"{} (UKIRT) - {} (2MASS)".format(oneBand,oneBand))
         axArr[bandInd,0].set_xlabel("{} (UKIRT)".format(oneBand))
     
-        plot_density_scatter(axArr[bandInd,1],tab['J mag'] - tab['K mag'],diff)
+        densDat2 = plot_density_scatter(axArr[bandInd,1],tab['J mag'] - tab['K mag'],diff)
         axArr[bandInd,1].set_xlabel("J (UKIRT) - K (UKIRT)")
         axArr[bandInd,1].set_ylim(-0.2,0.2)
-        
+        axArr[bandInd,1].set_xlim(0,1)
+    
+    cax = fig.add_axes([0.91, 0.05, 0.02, 0.9]) #this locates the axis that is used for your colorbar. It is scaled 0 - 1.
+    fig.colorbar(densDat2,cax,label='Point density')
 #    minmax_show = [np.nanmin(tab['J mag']),np.nanmax(tab['Jmag_2mass'])]
     #plt.plot(minmax_show,1.0)
-    plt.show()
-    
-    return tm_res
-
+    outName = 'ukirt_2mass_{}.pdf'.format(src.replace(" ","_"))
+    outPath = os.path.join('plots/ukirt_2mass_compare',outName)
+    print("Saving plot to {}".format(outPath))
+    fig.savefig(outPath,bbox_inches='tight')
+    #fig.show()
 """
 Vizier.query_object("NGC 2506",catalog="II/246/out")
 result = Vizier.query_object("NGC 2506")
