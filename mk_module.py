@@ -5,6 +5,8 @@ import hecto_module as hm
 import phot_module as ps
 import pdb
 import os
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 
 class clusterClassification(object):
     """ Designed to get the data from the mkclass output """
@@ -17,6 +19,7 @@ class clusterClassification(object):
         className = os.path.basename(mkOutFile)
         ## The path to the synthesized photometry and classification
         self.synthPath = 'output_synthesized/class_phot_synth_{}.csv'.format(className)
+        self.LRIS = False ## is this LRIS data?
     
     def split_Types(self):
         tclass, lumclass, xtra, tletter = [], [], [], []
@@ -89,7 +92,8 @@ class clusterClassification(object):
         else:
             defaultIndices = [0]
         
-        hS = hm.clusterSpec(src=self.src,indices=defaultIndices)
+        if self.LRIS == False:
+            hS = hm.clusterSpec(src=self.src,indices=defaultIndices)
         pS = ps.clusterPhot(src=self.src)
         uK = ps.clusterPhot(src=self.src,photType='UKIRTData')
         
@@ -107,17 +111,28 @@ class clusterClassification(object):
         jmag, hmag = [], []
         
         for oneRow in self.classData[lookRows]:
-            baseName = os.path.basename(oneRow['SpFile'])
-            namePrefix = os.path.splitext(baseName)[0]
-            searchName = namePrefix.split("_spec")[0]
-            fibinfo = hS.getbyObjName(searchName)
-            ra = float(fibinfo['RA'])
-            dec = float(fibinfo['DEC'])
-            posRA.append(ra)
-            posDec.append(dec)
+            if self.LRIS == False:
+                ## Use Hectospec info
+                baseName = os.path.basename(oneRow['SpFile'])
+                namePrefix = os.path.splitext(baseName)[0]
+                searchName = namePrefix.split("_spec")[0]
+                fibinfo = hS.getbyObjName(searchName)
+                ra = float(fibinfo['RA'])
+                dec = float(fibinfo['DEC'])
+                posRA.append(ra)
+                posDec.append(dec)
+                names.append(str(fibinfo['OBJTYPE']))
+            else:
+                c1 = SkyCoord(oneRow['RA'],oneRow['Dec'],unit=(u.hourangle,u.deg))
+                ra = c1.ra.deg
+                dec = c1.dec.deg
+                posRA.append(ra)
+                posDec.append(dec)
+                names.append(oneRow['name'])
+            
             phot = pS.lookup_src(ra,dec)
             
-            names.append(str(fibinfo['OBJTYPE']))
+            
             if phot is None:
                 colors.append(np.nan)
                 mags.append(np.nan)
@@ -167,7 +182,29 @@ class clusterClassification(object):
         if sType == 'All':
             t.write(self.synthPath,overwrite=True)
 
-def get_candidates(t,widerT=True,gCut=1.0):
+class clusterClassificationLRIS(clusterClassification):
+    """
+    Get the cluster classification
+    """
+    def __init__(self,mkCombFile='../classification/ngc2506_lris_combined.csv',src='NGC 2506'):
+        self.mkOutFile = mkCombFile
+        self.classData = ascii.read(mkCombFile)
+        self.classData['SpType'] = self.classData['MkClass SpType Lib18_225']
+        self.src = src
+        self.split_Types()
+        className = os.path.basename(mkCombFile)
+        ## The path to the synthesized photometry and classification
+        self.synthPath = 'output_synthesized/class_phot_synth_fromLRISobj_{}.csv'.format(className)
+    
+        self.classData['g'] = self.classData['g mag']
+        self.LRIS = True
+        
+        
+        
+    
+
+def get_candidates(t,widerT=True,gCut=1.0,
+                   widerLum=True):
     """ 
     Get the interesting near-solar candidates from a 
     synthesized photometry + spectral classification table
@@ -187,7 +224,10 @@ def get_candidates(t,widerT=True,gCut=1.0):
         tClasses = ['G0','G1','G2','G3']
     else:
         tClasses = ['G1','G2','G3']
-    lClasses = ['IV','IV-V','V']
+    if widerLum == True:
+        lClasses = ['IV','IV-V','V']
+    else:
+        lClasses = ['V']
     
     TGood = np.zeros(len(t),dtype=np.bool)
     LGood = np.zeros(len(t),dtype=np.bool)
@@ -200,15 +240,19 @@ def get_candidates(t,widerT=True,gCut=1.0):
         goodP = (t['Lum Class'] == oneLClass)
         LGood = LGood | goodP
     
-    medMag = np.median(t['g'][LGood & TGood])
+    medMag = np.nanmedian(t['g'][LGood & TGood])
     magCheck = t['g'] > (medMag - gCut)
     
     t['T Group'] = np.zeros(len(t),dtype='S64')
     
     for oneTClass in tClasses:
         tGroupPts = (t['T Class'] == oneTClass)
-        groupName = "{} {} to {}".format(oneTClass,lClasses[0],lClasses[-1])
+        if widerLum == True:
+            groupName = "{} {} to {}".format(oneTClass,lClasses[0],lClasses[-1])
+        else:
+            groupName = "{} {}".format(oneTClass,lClasses[0])
         t['T Group'][tGroupPts & LGood & magCheck] = groupName
+    
     
     return t[LGood & TGood & magCheck]
     

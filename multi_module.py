@@ -96,11 +96,17 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
                       color1=color1,color2=color2,mag=mag)
         colorShow = getClusterInfo(src,solarColor)
     
-    mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
+    if src == 'NGC 2506':
+        mkObj = mk.clusterClassificationLRIS(src=src)
+    else:
+        mkObj = mk.clusterClassification(mkOutFile=mkOutFile,src=src)
     
     if groupType == 'near G2 V':
         ## a list of categories to group sources into
-        typeExplore = ['G0 IV to V','G1 IV to V','G2 IV to V','G3 IV to V']
+        if src == 'NGC 2506':
+            typeExplore = ['G0 V','G1 V','G2 V','G3 V']
+        else:
+            typeExplore = ['G0 IV to V','G1 IV to V','G2 IV to V','G3 IV to V']
         ## The colors of the categories
         colorArr = ['magenta','red','orange','green']
         ## The column name for the parameter that will be grouped
@@ -124,12 +130,18 @@ def do_cm(fov=False,mkOutFile=None,src='NGC 2420',returnAx=False,
     if (groupType == 'Candidates') | (groupType == 'near G2 V'):
         if src == 'NGC 2420':
             widerT=False
+            widerLum = True
+        elif src == 'NGC 2506':
+            widerT=False
+            widerLum = False
         else:
             widerT=True
+            widerLum = True
         ## Need a wider T range since we don't have as much data
         ## on NGC 2506 and NGC 6811 yet
         
-        allPhotDat = mk.get_candidates(allPhotDat,widerT=widerT)
+        allPhotDat = mk.get_candidates(allPhotDat,widerT=widerT,
+                                       widerLum=widerLum)
     
     for oneType,dispCol in zip(typeExplore,colorArr):
         #mkObj.get_phot(sType=oneType,sCategory=sCategory)
